@@ -23,6 +23,7 @@ import { Constants } from "../common/Constants";
 import AppText from "./AppText";
 import { textStyles } from "../common/CommonStyles";
 import { AppString } from "../common/AppString";
+import { TaskStatus_Type } from "../types/taskTypes";
 
 const ClockCard = (
     {
@@ -125,7 +126,10 @@ const ClockCard = (
         }
     };
 
-    const handleClockOutWithCallback = async () => {
+    const handleClockOutWithCallback = async (finalTask?: {
+        status: TaskStatus_Type;
+        taskTitle: string;
+    }) => {
         const now = Date.now();
         const saved = await AsyncStorage.getItem(Constants.STORAGE_KEY);
         const start = saved ? parseInt(saved, 10) : startTimestamp;
@@ -139,8 +143,8 @@ const ClockCard = (
             timestamp: now,
             // status: (onCheckOut as any)?.status,
             // taskTitle: (onCheckOut as any)?.taskTitle,
-            status: currentTask?.status ?? AppString.Completed,
-            taskTitle: currentTask?.taskTitle ?? "—",
+            status: finalTask?.status ?? currentTask?.status ?? AppString.Completed,
+            taskTitle: finalTask?.taskTitle ?? currentTask?.taskTitle ?? "—",
         };
 
         if (typeof onCheckOut === "function") {
@@ -154,6 +158,36 @@ const ClockCard = (
     };
 
     useImperativeHandle(ref, () => ({
+        completeClockOut: async (finalTask?: {
+            status: string;
+            taskTitle: string;
+        }) => {
+            if (!isClockedIn) return;
+
+            const now = Date.now();
+            const saved = await AsyncStorage.getItem(Constants.STORAGE_KEY);
+            const start = saved ? parseInt(saved, 10) : startTimestamp;
+            const durationMs = start ? now - start : 0;
+
+            const clockData = {
+                checkInTime: Constants.formatTimeHMClockCard(start || now),
+                checkOutTime: Constants.formatTimeHMClockCard(now),
+                duration: Constants.formatDurationClockCard(durationMs),
+                date: Constants.newDateDMY,
+                timestamp: now,
+                status:
+                    finalTask?.status ??
+                    currentTask?.status ??
+                    AppString.Completed,
+                taskTitle:
+                    finalTask?.taskTitle ??
+                    currentTask?.taskTitle ??
+                    "—",
+            };
+
+            await saveClockRecord(clockData);
+            await stopEverything();
+        },
         forceTaskCheckout: async () => {
             if (!isClockedIn) return;
 
@@ -162,15 +196,13 @@ const ClockCard = (
             const start = saved ? parseInt(saved, 10) : startTimestamp;
             const durationMs = start ? now - start : 0;
 
-            console.log('Saved auto clock out', saved);
-
             const clockData = {
                 checkInTime: Constants.formatTimeHMClockCard(start || now),
                 checkOutTime: Constants.formatTimeHMClockCard(now),
                 duration: Constants.formatDurationClockCard(durationMs),
                 date: Constants.newDateDMY,
                 timestamp: now,
-                status: "In Progress",
+                status: AppString.InProgress,
                 taskTitle: currentTask?.taskTitle ?? "—",
             };
 

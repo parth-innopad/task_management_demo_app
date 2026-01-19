@@ -219,10 +219,15 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ navigation }) => 
                         //     deferredClockHandler.taskTitle = updatedTask.taskTitle;
                         //     clockOutCompletion();
                         // }
-                        clockOutCompletion?.({
+                        // clockOutCompletion?.({
+                        //     status,
+                        //     taskTitle: updatedTask.taskTitle,
+                        // });
+                        clockRef.current?.completeClockOut({
                             status,
                             taskTitle: updatedTask.taskTitle,
                         });
+
                         setIsClockedIn(false);
                     }}
                 />
