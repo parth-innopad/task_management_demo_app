@@ -1,4 +1,4 @@
-import { View, StyleSheet, Image, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, Image, TouchableOpacity, Keyboard } from 'react-native'
 import React, { useState } from 'react'
 import { COLORS } from '../../../utils/theme';
 import { hs, vs } from '../../../utils/stylesUtils';
@@ -61,6 +61,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation }) => {
         },
         validationSchema: signinValidationSchema,
         onSubmit: values => {
+            Keyboard.dismiss()
             loginHandler(values);
         }
     })

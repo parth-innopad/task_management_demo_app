@@ -74,7 +74,7 @@ const ClockCard = (
 
     useEffect(() => {
         if (isClockedIn) {
-            spinAnim.setValue(0); // reset
+            spinAnim.setValue(0);
             animationRef.current = Animated.loop(
                 Animated.timing(spinAnim, {
                     toValue: 1,
@@ -202,7 +202,7 @@ const ClockCard = (
         });
 
         return () => {
-            stopEverything();
+            // stopEverything();
             sub.remove();
         };
     }, []);
@@ -211,9 +211,6 @@ const ClockCard = (
         <AppCard style={{ marginTop: vs(20) }}>
             <View style={styles.row}>
                 <View style={styles.left}>
-                    {/* <View style={styles.iconContainer}>
-                        <Clock size={30} color={COLORS.card} />
-                    </View> */}
                     <Animated.View
                         style={[styles.iconContainer, {
                             transform: [

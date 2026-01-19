@@ -14,7 +14,7 @@ import ConfirmationModal from '../subviews/ConfirmationModal'
 import { _showToast } from '../services/UIS/toastConfig'
 import { AppString } from '../common/AppString'
 
-const ActiveInActive = ({ onBreakInBefore }: any) => {
+const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
 
     const dispatch = useDispatch();
 
@@ -55,6 +55,14 @@ const ActiveInActive = ({ onBreakInBefore }: any) => {
         (loginData?.totalBreakSecondsToday || 0) + liveBreakSeconds;
 
     const handleLogoutPress = () => {
+        if (isClockedIn) {
+            _showToast(
+                AppString.YourWorkSessionIsRunning,
+                AppString.error
+            );
+            return;
+        }
+
         if (loginData?.isActive) {
             setModalVisible(true);
         } else {
@@ -106,25 +114,25 @@ const ActiveInActive = ({ onBreakInBefore }: any) => {
                     />
                 </View>
 
-                {isShownCheckIn == true ? null :
-                    <TouchableOpacity
-                        style={[
-                            styles.powerButton,
-                            {
-                                backgroundColor: loginData?.isActive
-                                    ? COLORS.activeRGBA
-                                    : COLORS.inActiveRGBA,
-                            },
-                        ]}
-                        onPress={() => handleLogoutPress()}
-                    >
-                        {loginData?.isActive ? (
-                            <Power size={20} color={COLORS.success} />
-                        ) : (
-                            <PowerOff size={20} color={COLORS.danger} />
-                        )}
-                    </TouchableOpacity>
-                }
+                {/* {isShownCheckIn == true ? null : */}
+                <TouchableOpacity
+                    style={[
+                        styles.powerButton,
+                        {
+                            backgroundColor: loginData?.isActive
+                                ? COLORS.activeRGBA
+                                : COLORS.inActiveRGBA,
+                        },
+                    ]}
+                    onPress={() => handleLogoutPress()}
+                >
+                    {loginData?.isActive ? (
+                        <Power size={20} color={COLORS.success} />
+                    ) : (
+                        <PowerOff size={20} color={COLORS.danger} />
+                    )}
+                </TouchableOpacity>
+                {/* } */}
             </View>
 
             <AppText

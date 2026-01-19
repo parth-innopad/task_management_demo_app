@@ -1,4 +1,4 @@
-import { View, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native'
+import { View, StyleSheet, TouchableOpacity, FlatList, Image, Keyboard } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import ScreenContainer from '../../../../components/ScreenContainer'
 import { COLORS } from '../../../../utils/theme'
@@ -105,6 +105,7 @@ const CreateEditEmployee: React.FC<CreateEditEmployeeProps> = ({ navigation, rou
         },
         validationSchema: createEditEmployeeValidationSchema,
         onSubmit: values => {
+            Keyboard.dismiss()
             handleCreateEditEmployee(values);
         },
     })

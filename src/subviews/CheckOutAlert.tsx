@@ -19,7 +19,7 @@ const CheckOutAlert: React.FC<Props> = ({ visible, onClose, onChoose, currentTas
     };
 
     return (
-        <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
+        <Modal visible={visible} animationType="none" transparent onRequestClose={onClose}>
             <View style={styles.wrapper}>
                 <Pressable style={styles.modalOverlay} onPress={onClose} />
                 <View style={styles.dialog}>

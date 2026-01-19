@@ -1,4 +1,4 @@
-import { View, TouchableOpacity, StyleSheet, Image, FlatList } from 'react-native'
+import { View, TouchableOpacity, StyleSheet, Image, FlatList, Keyboard } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import ScreenContainer from '../../../../components/ScreenContainer';
 import { COLORS } from '../../../../utils/theme';
@@ -76,6 +76,7 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
                 status: editTasksLists?.status || state.status,
                 statusId: state.statusId,
             };
+            Keyboard.dismiss()
             if (route?.params?.fromEditTask) {
                 _showToast(AppString.TaskUpdatedSuccessfully, AppString.success);
                 dispatch(setIsUpdateTasks(payload));
@@ -290,6 +291,7 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
                         open
                         date={formik.values.startDateTime ?? new Date()}
                         mode="datetime"
+                        minimumDate={new Date()}
                         onConfirm={(date) => {
                             formik.setFieldValue('startDateTime', date);
                             formik.setFieldTouched('startDateTime', false);
@@ -338,6 +340,7 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
                         open
                         date={formik.values.endDateTime ?? new Date()}
                         mode="datetime"
+                        minimumDate={new Date()}
                         onConfirm={(date) => {
                             formik.setFieldValue('endDateTime', date);
                             formik.setFieldTouched('endDateTime', false);

@@ -41,12 +41,34 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ navigation }) => 
     const saveUser = useSelector((state: any) => state.appData.saveUser);
     const allTasks = useSelector((state: RootState) => state.appData.tasks);
     const currentUser = useSelector((state: RootState) => state.appData.saveUser);
+    const todayKey = Constants.newDateISOStringSplit;
+
+    const loginData = useSelector((state: RootState) => {
+        const empData = state.appData.employeeLoginStatus[currentUser?.id];
+        if (!empData) return null;
+        return empData.find(d => d.date === todayKey) || null;
+    });
 
     const filteredTasks = allTasks.filter(t =>
         (t.employeeSelectId === currentUser?.id ||
             t.employeeSelect === currentUser?.id) &&
         (t.status === AppString.Pending || t.status === AppString.InProgress)
     );
+
+    useEffect(() => {
+        if (!currentUser?.id || !allTasks?.length) return;
+        const activeTask = allTasks.find(
+            t =>
+                (t.employeeSelectId === currentUser.id ||
+                    t.employeeSelect === currentUser.id) &&
+                t.status === AppString.InProgress
+        );
+        if (activeTask) {
+            setCurrentTask(activeTask);
+        } else {
+            setCurrentTask(null);
+        }
+    }, [allTasks, currentUser]);
 
     return (
         <ScreenContainer backgroundColor={COLORS.bg}>
@@ -65,6 +87,7 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ navigation }) => 
                 />
 
                 <ActiveInActive
+                    isClockedIn={isClockedIn}
                     onBreakInBefore={async () => {
                         if (isClockedIn && clockRef.current) {
                             await clockRef.current.forceTaskCheckout();
@@ -97,7 +120,7 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ navigation }) => 
                     currentTask={currentTask}
                 />
 
-                {currentTask && (
+                {isClockedIn && (
                     <AppCard style={{ marginTop: vs(20) }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                             <ClipboardList size={25} color={COLORS.secondaryPrimary} />
@@ -162,10 +185,10 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ navigation }) => 
                     onClose={() => setShowCheckInModal(false)}
                     tasks={filteredTasks}
                     onStart={(t: any) => {
-                        if (!isClockedIn) {
+                        if (!loginData?.isActive) {
                             _showToast(AppString.StartActiveTimeFirst, AppString.error);
                             setShowCheckInModal(false);
-                            return
+                            return;
                         }
                         const updatedTask = {
                             ...t,

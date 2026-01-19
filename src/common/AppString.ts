@@ -161,4 +161,5 @@ export const AppString = {
     TaskDeletedSuccessfully: 'Task Deleted Successfully',
     LogoutSuccessfully: 'Logout Successfully',
     StartActiveTimeFirst: "Active Time is not started, Please Start active time first",
+    YourWorkSessionIsRunning: "Your work session is still active, Please check out first."
 }
