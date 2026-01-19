@@ -1,0 +1,23 @@
+export const NavigationKeys = {
+    Splash: 'Splash',
+    Login: 'Login',
+    AuthNavigation: 'AuthNavigation',
+    AdminNavigation: 'AdminNavigation',
+    Dashboard: 'Dashboard',
+    EmployeeList: 'EmployeeList',
+    CreateEditEmployee: 'CreateEditEmployee',
+    EmployeeDetails: 'EmployeeDetails',
+    CreateEditFieldVisit: 'CreateEditFieldVisit',
+    Attendance: 'Attendance',
+    AttendanceRules: 'AttendanceRules',
+    Tasks: 'Tasks',
+    CreateEditTasks: 'CreateEditTasks',
+    TasksDetails: 'TasksDetails',
+    EmployeeNavigation: 'EmployeeNavigation',
+    EmployeeDashboard: 'EmployeeDashboard',
+    EmployeeAttendance: 'EmployeeAttendance',
+    Profile: 'Profile',
+    EmployeeTasks: 'EmployeeTasks',
+    EmployeeTasksSummary: 'EmployeeTasksSummary',
+    EmployeeTasksHistory: 'EmployeeTasksHistory'
+}
