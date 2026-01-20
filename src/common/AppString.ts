@@ -167,5 +167,7 @@ export const AppString = {
     YourBreakInStillRunning: "Your break-in is still running, Please break-out first",
     InvalidEmailAddress: "Invalid email address",
     IncorrectPassword: "Incorrect password",
-    InvalidUserRole: "Invalid user role"
+    InvalidUserRole: "Invalid user role",
+    addYourFirstEmployee: "Add your first employee",
+    addYourFirstTask: 'Add your first task'
 }

@@ -143,13 +143,17 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ navigation }) => 
                     <AppCard style={{ marginTop: vs(20) }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                             <ClipboardList size={25} color={COLORS.secondaryPrimary} />
-                            <AppText
-                                txt={`${AppString.Workingon} ${currentTask?.taskTitle}`}
-                                style={[
-                                    textStyles.bodySmall,
-                                    { color: COLORS.secondaryPrimary },
-                                ]}
-                            />
+                            <View style={{ flex: 1, flexShrink: 1 }}>
+                                <AppText
+                                    txt={`${AppString.Workingon} ${currentTask?.taskTitle}`}
+                                    style={[
+                                        textStyles.bodySmall,
+                                        { color: COLORS.secondaryPrimary },
+                                    ]}
+                                    numberOfLines={2}
+                                    ellipsizeMode="tail"
+                                />
+                            </View>
                         </View>
 
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: vs(10) }}>

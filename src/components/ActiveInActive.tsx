@@ -39,6 +39,21 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
         return empData.find(d => d.date === todayKey) || null;
     });
 
+    const shouldShowTotals =
+        !loginData?.isActive &&                    // user logged out
+        !!currentSessionData.startTime &&          // session started
+        !!currentSessionData.endTime
+
+    const shouldShowBreakTimings =
+        currentSessionData.breaks &&
+        currentSessionData.breaks.length > 0;
+
+    const hasCompletedBreak =
+        currentSessionData.breaks.some(b => b.breakOut);
+
+    const shouldShowTotalBreak =
+        hasCompletedBreak && !loginData?.isOnBreak;
+
     // Track current session
     useEffect(() => {
         if (loginData) {
@@ -110,19 +125,25 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
     }, [currentSessionData.startTime, currentSessionData.endTime, loginData?.isActive]);
 
     // Total break seconds for CURRENT SESSION only - FIXED PRECISION
+    // const totalBreakSeconds = React.useMemo(() => {
+    //     if (!currentSessionData.breaks?.length) return 0;
+
+    //     return currentSessionData.breaks.reduce((sum: number, b: any) => {
+    //         if (!b.breakOut) return sum;
+
+    //         // Normalize timestamps to seconds FIRST
+    //         const breakInSec = Math.floor(new Date(b.breakIn).getTime() / 1000);
+    //         const breakOutSec = Math.floor(new Date(b.breakOut).getTime() / 1000);
+
+    //         const diffSeconds = breakOutSec - breakInSec;
+
+    //         return diffSeconds > 0 ? sum + diffSeconds : sum;
+    //     }, 0);
+    // }, [currentSessionData.breaks]);
+
     const totalBreakSeconds = React.useMemo(() => {
-        if (!currentSessionData.breaks?.length) return 0;
-
-        return currentSessionData.breaks.reduce((sum: number, b: any) => {
-            if (!b.breakOut) return sum;
-
-            // Normalize timestamps to seconds FIRST
-            const breakInSec = Math.floor(new Date(b.breakIn).getTime() / 1000);
-            const breakOutSec = Math.floor(new Date(b.breakOut).getTime() / 1000);
-
-            const diffSeconds = breakOutSec - breakInSec;
-
-            return diffSeconds > 0 ? sum + diffSeconds : sum;
+        return currentSessionData.breaks.reduce((sum, b) => {
+            return sum + Constants.getBreakSeconds(b);
         }, 0);
     }, [currentSessionData.breaks]);
 
@@ -254,7 +275,6 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
 
             {loginData?.isActive && (
                 <Fragment>
-                    <View style={styles.divider} />
                     <TouchableOpacity
                         disabled={isBreakLimitReached}
                         style={[
@@ -266,6 +286,7 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
                                         ? COLORS.LightGrayDisable
                                         : COLORS.inActiveRGBA,
                                 opacity: (isBreakLimitReached && !loginData?.isOnBreak) ? 0.6 : 1,
+                                marginTop: vs(20)
                             },
                         ]}
                         onPress={async () => {
@@ -319,7 +340,7 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
             )}
 
             {/* Always show total hours - it will show session total when inactive */}
-            {loginData?.isActive && currentSessionData.startTime && (
+            {/* {loginData?.isActive && currentSessionData.startTime && (
                 <Fragment>
                     <View style={[styles.infoRow]}>
                         <Coffee size={20} color={COLORS.warning} />
@@ -341,7 +362,90 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
                 <Text style={[styles.totalValue, { color: COLORS.secondaryPrimary }]}>
                     {totalTodaySeconds > 0 ? Constants.formatHours(totalTodaySeconds) : '0h 0m 0s'}
                 </Text>
-            </View>
+            </View> */}
+
+            {shouldShowBreakTimings && (
+                <Fragment>
+                    <AppText
+                        txt="Break Timings"
+                        style={[
+                            textStyles.bodySmall,
+                            {
+                                fontWeight: '700',
+                                color: COLORS.secondaryPrimary,
+                                marginTop: vs(20),
+                            },
+                        ]}
+                    />
+
+                    {currentSessionData.breaks.map((item: any, index: number) => (
+                        <Fragment key={index}>
+                            {/* Break In */}
+                            <View style={styles.infoRow}>
+                                <Coffee size={18} color={COLORS.warning} />
+                                <Text style={styles.infoLabel}>Break In</Text>
+                                <Text style={styles.infoValue}>
+                                    {Constants.startEndTime(item.breakIn)}
+                                </Text>
+                            </View>
+
+                            {/* Break Out */}
+                            <View style={styles.infoRow}>
+                                <Coffee size={18} color={COLORS.warning} />
+                                <Text style={styles.infoLabel}>Break Out</Text>
+                                <Text style={styles.infoValue}>
+                                    {item.breakOut
+                                        ? Constants.startEndTime(item.breakOut)
+                                        : 'Running'}
+                                </Text>
+                            </View>
+
+                            <View style={styles.divider} />
+                        </Fragment>
+                    ))}
+                </Fragment>
+            )}
+
+            {shouldShowTotalBreak && (
+                <Fragment>
+                    <View style={[styles.infoRow, { marginTop: vs(20) }]}>
+                        <Coffee size={22} color={COLORS.warning} />
+                        <Text style={styles.infoLabel}>Total Break</Text>
+                        <Text style={styles.infoValue}>
+                            {totalBreakSeconds > 0
+                                ? Constants.formatHours(totalBreakSeconds)
+                                : '0h 0m 0s'}
+                        </Text>
+                    </View>
+                </Fragment>
+            )}
+
+
+            {shouldShowTotals && (
+                <Fragment>
+                    <View style={styles.infoRow}>
+                        <Timer size={25} color={COLORS.secondaryPrimary} />
+                        <Text
+                            style={[
+                                styles.infoLabel,
+                                { color: COLORS.secondaryPrimary, fontWeight: '700' },
+                            ]}
+                        >
+                            Total Hours
+                        </Text>
+                        <Text
+                            style={[
+                                styles.totalValue,
+                                { color: COLORS.secondaryPrimary },
+                            ]}
+                        >
+                            {totalTodaySeconds > 0
+                                ? Constants.formatHours(totalTodaySeconds)
+                                : '0h 0m 0s'}
+                        </Text>
+                    </View>
+                </Fragment>
+            )}
 
             <ConfirmationModal
                 visible={modalVisible}
@@ -401,7 +505,7 @@ const styles = StyleSheet.create({
     divider: {
         height: 1,
         backgroundColor: '#E5E7EB',
-        marginVertical: vs(15),
+        marginTop: vs(20)
     },
     breakButton: {
         marginTop: vs(10),

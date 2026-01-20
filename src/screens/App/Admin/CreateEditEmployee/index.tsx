@@ -1,9 +1,9 @@
-import { View, StyleSheet, TouchableOpacity, FlatList, Image, Keyboard } from 'react-native'
+import { View, StyleSheet, TouchableOpacity, FlatList, Image, Keyboard, Alert } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import ScreenContainer from '../../../../components/ScreenContainer'
 import { COLORS } from '../../../../utils/theme'
 import AppHeader from '../../../../components/AppHeader'
-import { ArrowLeft, Camera, ChevronDown, Eye, EyeOff, Images, Pencil } from 'lucide-react-native'
+import { ArrowLeft, Camera, ChevronDown, Eye, EyeOff, Images, Pencil, Trash } from 'lucide-react-native'
 import { fs, hs, vs } from '../../../../utils/stylesUtils'
 import AppTextInput from '../../../../components/AppTextInput'
 import AppButton from '../../../../components/AppButton'
@@ -24,6 +24,7 @@ import AppAvatar from '../../../../components/AppAvatar'
 import debounce from 'lodash.debounce';
 import { fetchAddressSuggestions } from '../../../../services/APIS/apisServices'
 import { _showToast } from '../../../../services/UIS/toastConfig'
+import ErrorModal from '../../../../subviews/ErrorModal'
 
 interface CreateEditEmployeeProps {
     navigation: any;
@@ -49,7 +50,8 @@ const CreateEditEmployee: React.FC<CreateEditEmployeeProps> = ({ navigation, rou
         showsLists: false,
         selectDesignation: '',
         designationId: '',
-        addressSuggestions: []
+        addressSuggestions: [],
+        visibleErrModal: false
     });
 
     useEffect(() => {
@@ -379,6 +381,15 @@ const CreateEditEmployee: React.FC<CreateEditEmployeeProps> = ({ navigation, rou
                 isOpenSheet={state.isOpenPickerSheet}
                 close={() => setState((prev) => ({ ...prev, isOpenPickerSheet: false }))}
                 openPicker={openPicker}
+            />
+            <ErrorModal
+                visible={state.visibleErrModal}
+                title={'Profile Photo Upload'}
+                message={'Please save or remove profile photo'}
+                cancel={'OK'}
+                onCancel={() => {
+                    setState((prev) => ({ ...prev, visibleErrModal: false }))
+                }}
             />
         </ScreenContainer>
     )

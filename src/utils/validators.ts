@@ -6,7 +6,7 @@ export const signinValidationSchema = Yup.object().shape({
         .trim()
         .email(AppError.PleaseEnterValidEmail)
         .matches(
-            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.(com|in|net|org|co|edu|gov)$/i,
+            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/i,
             'Enter a valid email address'
         )
         .required(AppError.EmailRequired),
@@ -26,7 +26,7 @@ export const createEditEmployeeValidationSchema = Yup.object().shape({
     email: Yup.string()
         .trim()
         .matches(
-            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.(com|in|net|org|co|edu|gov)$/i,
+            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/i,
             'Enter a valid email address'
         )
         .required('Email is required'),

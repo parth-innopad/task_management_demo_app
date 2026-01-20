@@ -46,6 +46,14 @@ const Tasks: React.FC<TasksProps> = ({ navigation }) => {
     const tasksLists = useSelector((state: any) => state.appData.tasks);
     const employees = useSelector((state: any) => state.appData.createEmployee);
 
+    const isFilterApplied =
+        appliedFilters.status !== AppString.all ||
+        appliedFilters.priority !== AppString.all ||
+        appliedFilters.employeeId !== AppString.all ||
+        appliedFilters.startDateTime !== null ||
+        appliedFilters.endDateTime !== null;
+
+
     const filteredTasks = tasksLists.filter((task: any) => {
         // SEARCH
         if (
@@ -187,14 +195,36 @@ const Tasks: React.FC<TasksProps> = ({ navigation }) => {
                     }))}
                 />
                 <TouchableOpacity
-                    style={styles.filterBtnStyle}
-                    onPress={() => setState((prev) => ({ ...prev, filterVisible: true }))}
+                    style={[
+                        styles.filterBtnStyle,
+                        isFilterApplied && {
+                            backgroundColor: COLORS.secondaryPrimary,
+                            borderColor: COLORS.secondaryPrimary,
+                        },
+                    ]}
+                    onPress={() => setState(prev => ({ ...prev, filterVisible: true }))}
                 >
-                    <Filter size={20} color={COLORS.secondaryPrimary} />
+                    <Filter
+                        size={20}
+                        color={isFilterApplied ? COLORS.card : COLORS.secondaryPrimary}
+                    />
                 </TouchableOpacity>
+
             </View>
 
             <AppKeyboardScrollView>
+                {isFilterApplied && (
+                    <View style={{ marginHorizontal: hs(20), marginTop: vs(10) }}>
+                        <AppText
+                            txt={`Filtered ${appliedFilters.status.toLowerCase()} (${filteredTasks.length} results)`}
+                            style={[
+                                textStyles.bodySmall,
+                                { color: COLORS.secondaryPrimary, fontWeight: '600' },
+                            ]}
+                        />
+                    </View>
+                )}
+
                 <FlatList
                     data={filteredTasks}
                     keyExtractor={(_, index) => index.toString()}
@@ -206,7 +236,7 @@ const Tasks: React.FC<TasksProps> = ({ navigation }) => {
                     }}
                     ListEmptyComponent={
                         <AppText
-                            txt={AppString.NoResultsFound}
+                            txt={state.search ? AppString.NoResultsFound : AppString.addYourFirstTask}
                             style={[textStyles.emptyText, {
                                 textAlign: 'center',
                                 marginTop: vs(50)

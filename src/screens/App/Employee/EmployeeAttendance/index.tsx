@@ -66,6 +66,21 @@ const EmployeeAttendance: React.FC<EmployeeAttendanceProps> = ({ navigation }: a
 
     const dayAttendance = dateMap[selectedDate];
 
+    const totalBreakSecondsToday = React.useMemo(() => {
+        if (!dayAttendance.breaks?.length) return 0;
+
+        return dayAttendance.breaks.reduce((sum: number, b: any) => {
+            if (!b.breakOut) return sum;
+
+            const breakInSec = Math.floor(new Date(b.breakIn).getTime() / 1000);
+            const breakOutSec = Math.floor(new Date(b.breakOut).getTime() / 1000);
+
+            const diff = breakOutSec - breakInSec;
+            return diff > 0 ? sum + diff : sum;
+        }, 0);
+    }, [dayAttendance.breaks]);
+
+
     return (
         <ScreenContainer backgroundColor={COLORS.bg}>
             <AppHeader
@@ -152,7 +167,8 @@ const EmployeeAttendance: React.FC<EmployeeAttendanceProps> = ({ navigation }: a
                                     style={textStyles.bodySmall}
                                 />
                                 <AppText
-                                    txt={Constants.formatHours(dayAttendance.totalBreakSecondsToday)}
+                                    // txt={Constants.formatHours(dayAttendance.totalBreakSecondsToday)}
+                                    txt={Constants.formatHours(totalBreakSecondsToday)}
                                     style={[textStyles.primary15, { marginTop: vs(4), color: COLORS.secondaryPrimary }]}
                                 />
                             </View>
@@ -231,7 +247,8 @@ const EmployeeAttendance: React.FC<EmployeeAttendanceProps> = ({ navigation }: a
                                                     />
                                                 </View>
                                                 <AppText
-                                                    txt={`${Constants.formatHours(b.durationSeconds)}`}
+                                                    // txt={`${Constants.formatHours(b.durationSeconds)}`}
+                                                    txt={Constants.formatHours(Constants.getBreakSeconds(b))}
                                                     style={[textStyles.bodySmall, { color: COLORS.secondaryPrimary }]}
                                                 />
                                             </View>

@@ -271,5 +271,11 @@ export const Constants = {
     getDateOnly: (value: string | Date) => {
         const d = new Date(value);
         return d.toISOString().split('T')[0];
+    },
+    getBreakSeconds: (b: any) => {
+        if (!b.breakIn || !b.breakOut) return 0;
+        return Math.floor(
+            (new Date(b.breakOut).getTime() - new Date(b.breakIn).getTime()) / 1000
+        );
     }
 }

@@ -1,5 +1,5 @@
 import { View, TouchableOpacity, StyleSheet, Image, FlatList, Keyboard } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import ScreenContainer from '../../../../components/ScreenContainer';
 import { COLORS } from '../../../../utils/theme';
 import AppHeader from '../../../../components/AppHeader';
@@ -37,10 +37,13 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
     const dispatch = useDispatch();
 
     const tasksLists = useSelector((state: any) => state.appData.tasks);
-    const editTasksLists = tasksLists?.find(
-        (item: any) => item.tasksId === route?.params?.taskId
-    );
+    const editTasksLists = useMemo(
+        () => tasksLists?.find((item: any) => item.tasksId === route?.params?.taskId),
+        [tasksLists, route?.params?.taskId]
+    )
     const employeesLists = useSelector((state: any) => state.appData.createEmployee);
+
+    const defaultStartDateRef = useRef(new Date());
 
     const [state, setState] = useState({
         showsLists: false,
@@ -62,7 +65,7 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
             location: editTasksLists?.location?.trim() || '',
             startDateTime: editTasksLists?.startDateTime
                 ? new Date(editTasksLists.startDateTime)
-                : null,
+                : defaultStartDateRef.current,
             endDateTime: editTasksLists?.endDateTime
                 ? new Date(editTasksLists.endDateTime)
                 : null,
@@ -99,6 +102,12 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
         return () => {
             debouncedFetch.cancel();
         };
+    }, []);
+
+    useEffect(() => {
+        if (!route?.params?.fromEditTask) {
+            formik.setFieldValue('startDateTime', new Date(), false);
+        }
     }, []);
 
     return (
@@ -285,14 +294,14 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
                 >
                     <Calendar size={20} color={COLORS.secondaryPrimary} />
                     <AppText
-                        txt={
-                            formik.values.startDateTime
-                                ? new Date(formik.values.startDateTime).toLocaleString()
-                                : AppString.StartDate
-                        }
+                        txt={new Date(formik.values.startDateTime).toLocaleString()}
                         style={[
                             textStyles.bodySmall,
-                            { color: formik.values.startDateTime ? COLORS.blackColor : COLORS.moreLightGreyColor, fontWeight: '500' }
+                            {
+                                // color: formik.values.startDateTime ? COLORS.blackColor : COLORS.moreLightGreyColor,
+                                color: COLORS.blackColor,
+                                fontWeight: '500'
+                            }
                         ]}
                     />
                 </TouchableOpacity>

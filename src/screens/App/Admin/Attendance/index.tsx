@@ -204,7 +204,8 @@ const Attendance: React.FC<AttendanceProps> = ({ navigation }) => {
                                     />
                                     <AppText
                                         style={[textStyles.bodySmall, { color: COLORS.secondaryPrimary }]}
-                                        txt={`${Constants.formatHours(br.durationSeconds)}`}
+                                        // txt={`${Constants.formatHours(br.durationSeconds)}`}
+                                        txt={Constants.formatHours(Constants.getBreakSeconds(br))}
                                     />
                                 </View>
                             ))}

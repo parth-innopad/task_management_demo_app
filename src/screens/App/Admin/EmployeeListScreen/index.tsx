@@ -86,7 +86,7 @@ const EmployeesListScreen: React.FC<EmployeeListProps> = ({ navigation }) => {
                     }}
                     ListEmptyComponent={
                         <AppText
-                            txt={AppString.NoResultsFound}
+                            txt={state.search ? AppString.NoResultsFound : AppString.addYourFirstEmployee}
                             style={[textStyles.emptyText, { color: COLORS.greyColor, textAlign: 'center', marginTop: vs(50) }]}
                         />
                     }
