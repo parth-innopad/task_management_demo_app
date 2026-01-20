@@ -236,7 +236,7 @@ const Tasks: React.FC<TasksProps> = ({ navigation }) => {
                     }}
                     ListEmptyComponent={
                         <AppText
-                            txt={state.search ? AppString.NoResultsFound : AppString.addYourFirstTask}
+                            txt={state.search || isFilterApplied ? AppString.NoResultsFound : AppString.addYourFirstTask}
                             style={[textStyles.emptyText, {
                                 textAlign: 'center',
                                 marginTop: vs(50)
