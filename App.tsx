@@ -1,5 +1,5 @@
-import React from 'react';
-import { StatusBar, Platform } from 'react-native';
+import React, { useEffect } from 'react';
+import { StatusBar, Platform, BackHandler, Alert } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { RootStack } from './src/navigation/RootStack';
@@ -17,7 +17,7 @@ const App = () => {
           <SafeAreaProvider>
             <StatusBar barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'} backgroundColor={"transparent"} translucent />
             <RootStack />
-            <Toast visibilityTime={2000} config={toastConfig} position="bottom" topOffset={60} />
+            <Toast config={toastConfig} position="top" topOffset={60} />
           </SafeAreaProvider>
         </GestureHandlerRootView>
       </PersistGate>

@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native'
-import React from 'react'
+import React, { Fragment, useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import ScreenContainer from '../../../../components/ScreenContainer';
 import { COLORS } from '../../../../utils/theme';
 import AppHeader from '../../../../components/AppHeader';
@@ -24,6 +24,8 @@ const TasksDetails: React.FC<TasksDetailsProps> = ({ navigation, route }) => {
 
     const tasks = route?.params?.tasks;
 
+    const [showFullDescription, setShowFullDescription] = useState(false);
+
     const DetailRow = ({
         icon,
         label,
@@ -37,13 +39,32 @@ const TasksDetails: React.FC<TasksDetailsProps> = ({ navigation, route }) => {
             <View style={styles.row}>
                 <View style={styles.rowLeft}>
                     <View style={styles.iconWrap}>{icon}</View>
-                    <AppText
-                        txt={label}
-                        style={textStyles.bodySmall}
-                    />
+                    <AppText txt={label} style={textStyles.bodySmall} />
                 </View>
                 <Text style={styles.value}>{value}</Text>
             </View>
+        )
+    }
+
+    const renderDescription = () => {
+        const text = tasks?.taskDescription || '-';
+        const limit = 100;
+
+        if (text.length <= limit) return <AppText txt={text} style={[textStyles.bodySmall, { lineHeight: fs(20) }]} />;
+
+        return (
+            <Fragment>
+                <AppText
+                    txt={showFullDescription ? text : text.substring(0, limit) + '...'}
+                    style={[textStyles.bodySmall, { lineHeight: fs(20) }]}
+                />
+                <TouchableOpacity onPress={() => setShowFullDescription(prev => !prev)}>
+                    <AppText
+                        txt={showFullDescription ? 'Read Less' : 'Read More'}
+                        style={[textStyles.bodySmall, { color: COLORS.secondaryPrimary, marginTop: vs(4) }]}
+                    />
+                </TouchableOpacity>
+            </Fragment>
         )
     }
 
@@ -62,17 +83,9 @@ const TasksDetails: React.FC<TasksDetailsProps> = ({ navigation, route }) => {
                 <AppCard style={styles.card}>
                     <AppText
                         txt={tasks?.taskTitle || '-'}
-                        style={[textStyles.subtitle, {
-                            color: COLORS.blackColor,
-                            marginBottom: vs(6),
-                        }]}
+                        style={[textStyles.subtitle, { color: COLORS.blackColor, marginBottom: vs(6) }]}
                     />
-                    <AppText
-                        txt={tasks?.taskDescription}
-                        style={[textStyles.bodySmall, {
-                            lineHeight: fs(20),
-                        }]}
-                    />
+                    {renderDescription()}
                 </AppCard>
 
                 <AppCard style={styles.card}>
@@ -92,27 +105,22 @@ const TasksDetails: React.FC<TasksDetailsProps> = ({ navigation, route }) => {
                         txt={AppString.Schedule}
                         style={[textStyles.primary15, { marginBottom: vs(12) }]}
                     />
-
                     <DetailRow
                         icon={<Calendar size={14} color={COLORS.secondaryPrimary} />}
-                        label={AppString.StartDate}
+                        label={"Start Date"}
                         value={Constants.formatDate(new Date(tasks.startDateTime))}
                     />
-
                     <DetailRow
                         icon={<Clock size={14} color={COLORS.success} />}
                         label={AppString.StartTime}
                         value={Constants.isoFormatTime(tasks.startDateTime)}
                     />
-
                     <View style={styles.divider} />
-
                     <DetailRow
                         icon={<Calendar size={14} color={COLORS.secondaryPrimary} />}
-                        label={AppString.EndDate}
+                        label={'End Date'}
                         value={Constants.formatDate(new Date(tasks.endDateTime))}
                     />
-
                     <DetailRow
                         icon={<Clock size={14} color={COLORS.danger} />}
                         label={AppString.EndTime}
@@ -180,6 +188,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#EEF2F6',
         marginVertical: vs(6),
     },
-})
+});
 
 export default TasksDetails;

@@ -4,6 +4,7 @@ import {
     StyleSheet,
     FlatList,
     Image,
+    ScrollView,
 } from 'react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import ScreenContainer from '../../../../components/ScreenContainer';
@@ -192,30 +193,32 @@ const EmployeeTasksHistory: React.FC<EmployeeTasksHistoryProps> = ({
                 }
             />
 
-            <Calendar
-                markedDates={markedDates}
-                onDayPress={(day) =>
-                    setSelectedDate(day.dateString)
-                }
-                theme={{
-                    todayTextColor: COLORS.secondaryPrimary,
-                    arrowColor: COLORS.secondaryPrimary
-                }}
-            />
-
-            <FlatList
-                data={filteredRecords}
-                keyExtractor={(_, i) => i.toString()}
-                renderItem={renderItem}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: vs(40), marginTop: vs(10) }}
-                ListEmptyComponent={
-                    <AppText
-                        txt={AppString.NoResultsFound}
-                        style={[textStyles.emptyText, { textAlign: 'center', marginTop: vs(20) }]}
-                    />
-                }
-            />
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: vs(50) }}>
+                <Calendar
+                    markedDates={markedDates}
+                    onDayPress={(day) =>
+                        setSelectedDate(day.dateString)
+                    }
+                    theme={{
+                        todayTextColor: COLORS.secondaryPrimary,
+                        arrowColor: COLORS.secondaryPrimary
+                    }}
+                />
+                <FlatList
+                    data={filteredRecords}
+                    keyExtractor={(_, i) => i.toString()}
+                    renderItem={renderItem}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: vs(50), marginTop: vs(10) }}
+                    scrollEnabled={false}
+                    ListEmptyComponent={
+                        <AppText
+                            txt={AppString.NoResultsFound}
+                            style={[textStyles.emptyText, { textAlign: 'center', marginTop: vs(20) }]}
+                        />
+                    }
+                />
+            </ScrollView>
         </ScreenContainer>
     );
 };

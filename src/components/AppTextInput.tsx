@@ -32,6 +32,7 @@ interface AppTextInputProps extends TextInputProps {
     onChangeText?: any,
     errorMessage?: any;
     keyboardType?: TextInputProps['keyboardType'];
+    hasError?: boolean;
 }
 
 const AppTextInput: React.FC<AppTextInputProps> = ({
@@ -53,6 +54,7 @@ const AppTextInput: React.FC<AppTextInputProps> = ({
     multiline,
     numberOfLines,
     keyboardType,
+    hasError,
     ...rest
 }) => {
 
@@ -66,7 +68,9 @@ const AppTextInput: React.FC<AppTextInputProps> = ({
             borderWidth: 1,
             borderRadius: inputBorderRadius ?? 10,
             backgroundColor: inputBackgroundColor ?? '#F1F4F8',
-            borderColor: inputBorderColor ?? '#F1F4F8',
+            borderColor: hasError
+                ? COLORS.danger
+                : inputBorderColor ?? '#F1F4F8',
             paddingHorizontal: hs(10),
             paddingVertical: isMultiline ? vs(10) : 0,
             minHeight: isMultiline ? vs(120) : vs(50),

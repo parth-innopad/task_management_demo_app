@@ -28,6 +28,7 @@ const EmployeeAttendance: React.FC<EmployeeAttendanceProps> = ({ navigation }: a
 
     const [selectedDate, setSelectedDate] = useState(today);
     const [showBreaks, setShowBreaks] = useState(false);
+    const [showTotalHours, setShowTotalHours] = useState(false);
 
     const currentUser = useSelector(
         (state: RootState) => state.appData.saveUser
@@ -81,6 +82,7 @@ const EmployeeAttendance: React.FC<EmployeeAttendanceProps> = ({ navigation }: a
                 onDayPress={day => {
                     setSelectedDate(day.dateString)
                     setShowBreaks(false)
+                    setShowTotalHours(false)
                 }}
                 theme={{
                     todayTextColor: COLORS.secondaryPrimary,
@@ -155,6 +157,47 @@ const EmployeeAttendance: React.FC<EmployeeAttendanceProps> = ({ navigation }: a
                                 />
                             </View>
                         </View>
+
+                        {dayAttendance.sessions?.length > 0 && (
+                            <Fragment>
+                                <TouchableOpacity
+                                    style={styles.breakToggle}
+                                    onPress={() =>
+                                        setShowTotalHours(prev => !prev)
+                                    }>
+                                    <AppText
+                                        txt={`${AppString.TotalWorkingHoursDetails} (${dayAttendance.sessions.length})`}
+                                        style={[textStyles.bodySmall, { color: COLORS.secondaryPrimary }]}
+                                    />
+                                    <AppText
+                                        txt={showTotalHours ? '▲' : '▼'}
+                                        style={[textStyles.bodySmall, { color: COLORS.secondaryPrimary }]}
+                                    />
+                                </TouchableOpacity>
+
+                                {showTotalHours &&
+                                    dayAttendance.sessions?.map(
+                                        (s: any, i: number) => (
+                                            <View key={i} style={styles.breakRow}>
+                                                <View style={styles.breakLeft}>
+                                                    <Clock
+                                                        size={15}
+                                                        color={COLORS.secondaryPrimary}
+                                                    />
+                                                    <AppText
+                                                        txt={`${Constants.formatTime(s.loginTime)} → ${Constants.formatTime(s.logoutTime)}`}
+                                                        style={[textStyles.bodySmall, { color: '#1B1D28' }]}
+                                                    />
+                                                </View>
+                                                <AppText
+                                                    txt={`${Constants.formatHours(s.durationSeconds)}`}
+                                                    style={[textStyles.bodySmall, { color: COLORS.secondaryPrimary }]}
+                                                />
+                                            </View>
+                                        )
+                                    )}
+                            </Fragment>
+                        )}
 
                         {dayAttendance.breaks?.length > 0 && (
                             <Fragment>

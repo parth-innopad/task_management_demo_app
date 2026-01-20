@@ -80,6 +80,11 @@ interface AttendanceDay {
         breakOut: string | null; // ISO string
         durationSeconds: number;
     }[];
+    sessions: {
+        loginTime: string;
+        logoutTime: string;
+        durationSeconds: number;
+    }[];
     user: User;
 }
 
@@ -156,7 +161,12 @@ const appDataSlice = createSlice({
         },
         setEmployeeLoginStatus: (
             state,
-            action: PayloadAction<{ employeeId: string; isActive: boolean; timestamp: any; user: User }>
+            action: PayloadAction<{
+                employeeId: string;
+                isActive: boolean;
+                timestamp: string;
+                user: User;
+            }>
         ) => {
             const { employeeId, isActive, timestamp, user } = action.payload;
             const dateKey = getDateKey(timestamp);
@@ -166,11 +176,8 @@ const appDataSlice = createSlice({
             }
 
             const list = state.employeeLoginStatus[employeeId];
-
-            // find today
             let today = list.find(d => d.date === dateKey);
 
-            // create today if not exists
             if (!today) {
                 today = {
                     date: dateKey,
@@ -181,36 +188,57 @@ const appDataSlice = createSlice({
                     totalWorkSecondsToday: 0,
                     totalBreakSecondsToday: 0,
                     breaks: [],
+                    sessions: [], // ✅ always defined for new days
                     user,
                 };
                 list.push(today);
             }
 
-            // always update user info
             today.user = user;
 
+            // 🔐 BACKWARD COMPATIBILITY (CRITICAL)
+            if (!today.sessions) {
+                today.sessions = [];
+            }
+
+            // 🔵 LOGIN
             if (isActive) {
                 if (!today.isActive) {
                     today.isActive = true;
                     today.loginTime = timestamp;
                     today.logoutTime = null;
                 }
-            } else {
-                if (today.loginTime && today.isActive) {
-                    const diffSeconds = (new Date(timestamp).getTime() - new Date(today.loginTime).getTime()) / 1000;
-                    today.totalWorkSecondsToday += Math.max(0, diffSeconds);
+            }
+            // 🔴 LOGOUT
+            else {
+                if (today.isActive && today.loginTime) {
+                    const diffSeconds = Math.floor(
+                        (new Date(timestamp).getTime() -
+                            new Date(today.loginTime).getTime()) / 1000
+                    );
+
+                    const workSeconds = Math.max(0, diffSeconds);
+
+                    today.sessions.push({
+                        loginTime: today.loginTime,
+                        logoutTime: timestamp,
+                        durationSeconds: workSeconds,
+                    });
+
+                    today.totalWorkSecondsToday += workSeconds;
                 }
+
                 today.isActive = false;
                 today.isOnBreak = false;
                 today.logoutTime = timestamp;
             }
 
-            // ensure previous dates are untouched
             state.employeeLoginStatus[employeeId] = [
                 ...list.filter(d => d.date !== dateKey),
-                today
-            ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                today,
+            ];
         },
+
         setBreakIn: (
             state,
             action: PayloadAction<{ employeeId: string; timestamp: string }>

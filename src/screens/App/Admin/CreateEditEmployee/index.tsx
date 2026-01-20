@@ -189,6 +189,7 @@ const CreateEditEmployee: React.FC<CreateEditEmployeeProps> = ({ navigation, rou
                         onChangeText={formik.handleChange('name')}
                         onBlur={formik.handleBlur('name')}
                         errorMessage={formik.touched.name && formik.errors.name}
+                        hasError={!!(formik.touched.name && formik.errors.name)}
                     />
                 </View>
 
@@ -207,6 +208,7 @@ const CreateEditEmployee: React.FC<CreateEditEmployeeProps> = ({ navigation, rou
                         errorMessage={formik.touched.email && formik.errors.email}
                         keyboardType='email-address'
                         autoCapitalize="none"
+                        hasError={!!(formik.touched.email && formik.errors.email)}
                     />
                 </View>
 
@@ -243,6 +245,7 @@ const CreateEditEmployee: React.FC<CreateEditEmployeeProps> = ({ navigation, rou
                         onBlur={formik.handleBlur('password')}
                         errorMessage={formik.touched.password && formik.errors.password}
                         secureTextEntry={!state.showPassword}
+                        hasError={!!(formik.touched.password && formik.errors.password)}
                     />
                 </View>
 
@@ -261,6 +264,7 @@ const CreateEditEmployee: React.FC<CreateEditEmployeeProps> = ({ navigation, rou
                         onChangeText={formik.handleChange('phoneNumber')}
                         onBlur={formik.handleBlur('phoneNumber')}
                         errorMessage={formik.touched.phoneNumber && formik.errors.phoneNumber}
+                        hasError={!!(formik.touched.phoneNumber && formik.errors.phoneNumber)}
                     />
                 </View>
 
@@ -270,8 +274,12 @@ const CreateEditEmployee: React.FC<CreateEditEmployeeProps> = ({ navigation, rou
                         txt={AppString.DesignationTitle}
                     />
                     <TouchableOpacity
-                        style={[styles.selectBox, { marginTop: vs(20) }]}
-                        onPress={() => setState((prev) => ({ ...prev, showsLists: !state.showsLists }))}
+                        style={[styles.selectBox, {
+                            borderWidth: formik.touched.designation && formik.errors.designation ? 1 : 0,
+                            borderColor: formik.touched.designation && formik.errors.designation ? COLORS.danger : undefined,
+                            marginTop: vs(20)
+                        }]}
+                        onPress={() => { setState((prev) => ({ ...prev, showsLists: !state.showsLists })), Keyboard.dismiss() }}
                     >
                         <AppText
                             style={[textStyles.bodySmall, {
@@ -336,6 +344,7 @@ const CreateEditEmployee: React.FC<CreateEditEmployeeProps> = ({ navigation, rou
                         }}
                         onBlur={formik.handleBlur('fieldLocation')}
                         errorMessage={formik.touched.fieldLocation && formik.errors.fieldLocation}
+                        hasError={!!(formik.touched.fieldLocation && formik.errors.fieldLocation)}
                     />
                     {state.addressSuggestions?.length > 0 && (
                         <View style={styles.suggestionBox}>
@@ -349,6 +358,7 @@ const CreateEditEmployee: React.FC<CreateEditEmployeeProps> = ({ navigation, rou
                                         onPress={() => {
                                             formik.setFieldValue('fieldLocation', item.fullAddress);
                                             setState((prev) => ({ ...prev, addressSuggestions: [] }))
+                                            Keyboard.dismiss()
                                         }}
                                     >
                                         <AppText txt={item.fullAddress} style={textStyles.bodySmall} />

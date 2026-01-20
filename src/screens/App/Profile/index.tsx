@@ -36,7 +36,15 @@ const Profile: React.FC<ProfileProps> = ({ navigation, route }) => {
 
     const dispatch = useDispatch();
 
+    const todayKey = Constants.newDateISOStringSplit;
+
     const currentUser = useSelector((state: RootState) => state.appData.saveUser);
+    const loginData: any = useSelector((state: RootState) => {
+        const empData = state.appData.employeeLoginStatus[currentUser?.id];
+        if (!empData) return null;
+        return empData.find(d => d.date === todayKey) || null;
+    });
+    const isActiveWorkSession = loginData?.isActive;
 
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -112,7 +120,15 @@ const Profile: React.FC<ProfileProps> = ({ navigation, route }) => {
 
                 <AppButton
                     label={AppString.Logout}
-                    onPress={() => setModalVisible(true)}
+                    onPress={() => {
+                        if (isActiveWorkSession) {
+                            _showToast(AppString.YourActiveTimeIsRunning, AppString.error)
+                            return;
+                        } else {
+                            setModalVisible(true)
+                            return;
+                        }
+                    }}
                     style={{ backgroundColor: COLORS.danger, marginTop: vs(50) }}
                 />
             </ScrollView>

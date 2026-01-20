@@ -10,7 +10,7 @@ import { AppString } from '../../../common/AppString';
 import AppTextInput from '../../../components/AppTextInput';
 import { useDispatch } from 'react-redux';
 import { setIsLogin, setIsSaveUser } from '../../../store/reducers/appDataSlice';
-import { loginUser } from '../../../services/authService';
+import { getAllUsers, loginUser } from '../../../services/authService';
 import AppKeyboardScrollView from '../../../components/AppKeyboardScrollView';
 import { useFormik } from 'formik';
 import { signinValidationSchema } from '../../../utils/validators';
@@ -33,15 +33,26 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation }) => {
 
     const loginHandler = (values: any) => {
         const { email, password } = values;
-        const user: any = loginUser(email, password);
-        if (!user) {
-            _showToast(AppString.IncorrectEmailPsw, AppString.error);
+
+        const usersList = getAllUsers();
+        const foundUser = usersList.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+        if (!foundUser) {
+            _showToast(AppString.InvalidEmailAddress, AppString.error);
             return;
         }
+
+        if (foundUser.password !== password) {
+            _showToast(AppString.IncorrectPassword, AppString.error);
+            return;
+        }
+
+        // Login success
         dispatch(setIsLogin(true));
-        dispatch(setIsSaveUser(user));
+        dispatch(setIsSaveUser(foundUser));
         _showToast(AppString.LoginSuccessfully, AppString.success);
-        switch (user.role) {
+
+        switch (foundUser.role) {
             case "admin":
                 navigation.navigate(NavigationKeys.AdminNavigation);
                 break;
@@ -49,7 +60,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation }) => {
                 navigation.navigate(NavigationKeys.EmployeeNavigation);
                 break;
             default:
-                _showToast("Invalid user role", AppString.error);
+                _showToast(AppString.InvalidUserRole, AppString.error);
                 break;
         }
     };
@@ -88,6 +99,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation }) => {
                     errorMessage={formik.touched.email && formik.errors.email}
                     keyboardType='email-address'
                     autoCapitalize="none"
+                    hasError={!!(formik.touched.email && formik.errors.email)}
                 />
                 <AppTextInput
                     placeholder={PlaceholderText.password}
@@ -108,6 +120,7 @@ const LoginScreen: React.FC<LoginProps> = ({ navigation }) => {
                     onBlur={formik.handleBlur('password')}
                     errorMessage={formik.touched.password && formik.errors.password}
                     secureTextEntry={!state.showPassword}
+                    hasError={!!(formik.touched.password && formik.errors.password)}
                 />
 
                 <AppButton

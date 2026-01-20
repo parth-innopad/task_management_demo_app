@@ -1,4 +1,4 @@
-import { View, TouchableOpacity, StyleSheet, FlatList } from 'react-native'
+import { View, TouchableOpacity, StyleSheet, FlatList, ScrollView } from 'react-native'
 import React, { useState } from 'react'
 import ScreenContainer from '../../../../components/ScreenContainer';
 import { COLORS } from '../../../../utils/theme';
@@ -28,6 +28,7 @@ const Attendance: React.FC<AttendanceProps> = ({ navigation }) => {
         selectedAttendance: null,
     });
     const [expandedBreaks, setExpandedBreaks] = useState<Record<string, boolean>>({});
+    const [expandedTotalHours, setExpandedTotalHours] = useState<Record<string, boolean>>({});
 
     const loginDataEmployeeAttendance = useSelector((state: RootState) => state.appData.employeeLoginStatus);
 
@@ -68,9 +69,17 @@ const Attendance: React.FC<AttendanceProps> = ({ navigation }) => {
         }));
     };
 
+    const toggleTotalHours = (key: string) => {
+        setExpandedTotalHours(prev => ({
+            ...prev,
+            [key]: !prev[key]
+        }));
+    };
+
     const _renderAttendanceItem = ({ item }: any) => {
         const key = `${item.user.id}-${item.date}`;
         const isExpanded = expandedBreaks[key];
+        const isExpandedTotalHrs = expandedTotalHours[key];
         return (
             <AppCard style={styles.card}>
                 <View style={styles.headerRow}>
@@ -122,7 +131,7 @@ const Attendance: React.FC<AttendanceProps> = ({ navigation }) => {
 
                 <View style={styles.timeRow}>
                     <View>
-                        <AppText txt={AppString.CheckIn} style={textStyles.bodySmall} />
+                        <AppText txt={AppString.CheckIn} style={[textStyles.bodySmall, { color: COLORS.success }]} />
                         <AppText
                             txt={item.loginTime ? Constants.formatTime(item.loginTime) : '--'}
                             style={[textStyles.bodySmall, { color: COLORS.blackColor, marginTop: vs(5) }]}
@@ -130,13 +139,45 @@ const Attendance: React.FC<AttendanceProps> = ({ navigation }) => {
                     </View>
 
                     <View>
-                        <AppText txt={AppString.CheckOut} style={textStyles.bodySmall} />
+                        <AppText txt={AppString.CheckOut} style={[textStyles.bodySmall, { color: COLORS.danger }]} />
                         <AppText
                             txt={item.logoutTime ? Constants.formatTime(item.logoutTime) : '--'}
                             style={[textStyles.bodySmall, { color: COLORS.blackColor, marginTop: vs(5) }]}
                         />
                     </View>
                 </View>
+
+                {item.sessions?.length > 0 && (
+                    <View style={[styles.breakSection, { marginTop: vs(10) }]}>
+                        <TouchableOpacity
+                            style={styles.breakHeader}
+                            onPress={() => toggleTotalHours(key)}
+                        >
+                            <AppText
+                                txt={`${AppString.TotalWorkingHoursDetails} (${item.sessions?.length})`}
+                                style={[textStyles.bodySmall, { color: COLORS.blackColor }]}
+                            />
+                            <AppText
+                                txt={isExpandedTotalHrs ? '▲' : '▼'}
+                                style={[textStyles.bodySmall, { color: COLORS.secondaryPrimary }]}
+                            />
+                        </TouchableOpacity>
+
+                        {isExpandedTotalHrs &&
+                            item.sessions.map((hr: any, index: number) => (
+                                <View key={index} style={styles.breakRow}>
+                                    <AppText
+                                        style={textStyles.bodySmall}
+                                        txt={`${Constants.formatTime(hr.loginTime)} → ${Constants.formatTime(hr.logoutTime)}`}
+                                    />
+                                    <AppText
+                                        style={[textStyles.bodySmall, { color: COLORS.secondaryPrimary }]}
+                                        txt={`${Constants.formatHours(hr.durationSeconds)}`}
+                                    />
+                                </View>
+                            ))}
+                    </View>
+                )}
 
                 {item.breaks?.length > 0 && (
                     <View style={styles.breakSection}>
@@ -145,7 +186,7 @@ const Attendance: React.FC<AttendanceProps> = ({ navigation }) => {
                             onPress={() => toggleBreaks(key)}
                         >
                             <AppText
-                                txt={`${AppString.Breaks} (${item.breaks?.length})`}
+                                txt={`${AppString.BreakDetails} (${item.breaks?.length})`}
                                 style={[textStyles.bodySmall, { color: COLORS.blackColor }]}
                             />
                             <AppText
@@ -171,8 +212,8 @@ const Attendance: React.FC<AttendanceProps> = ({ navigation }) => {
                 )}
                 <View style={styles.footerRow}>
                     <AppText
-                        style={[textStyles.bodySmall, { color: COLORS.blackColor }]}
-                        txt={`${AppString.Total} ${Constants.formatHours(item.totalWorkSecondsToday)}`}
+                        style={[textStyles.bodySmall, { color: COLORS.secondaryPrimary }]}
+                        txt={`${AppString.TotalWorking} :- ${Constants.formatHours(item.totalWorkSecondsToday)}`}
                     />
                     <TouchableOpacity
                         onPress={() =>
@@ -209,32 +250,33 @@ const Attendance: React.FC<AttendanceProps> = ({ navigation }) => {
                 }
             />
 
-            <Calendar
-                markedDates={markedDates}
-                onDayPress={(day) =>
-                    setState(prev => ({ ...prev, selectedDate: day.dateString }))
-                }
-                theme={{
-                    todayTextColor: COLORS.secondaryPrimary,
-                    arrowColor: COLORS.secondaryPrimary
-                }}
-            />
-
-            <FlatList
-                data={attendanceByDate}
-                keyExtractor={(_, index) => index.toString()}
-                renderItem={_renderAttendanceItem}
-                contentContainerStyle={{ marginTop: vs(10), paddingBottom: vs(40) }}
-                showsVerticalScrollIndicator={false}
-                ListEmptyComponent={
-                    <AppText
-                        style={[textStyles.emptyText, {
-                            textAlign: 'center', marginTop: vs(20)
-                        }]}
-                        txt={AppString.NoResultsFound}
-                    />
-                }
-            />
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: vs(50) }}>
+                <Calendar
+                    markedDates={markedDates}
+                    onDayPress={(day) =>
+                        setState(prev => ({ ...prev, selectedDate: day.dateString }))
+                    }
+                    theme={{
+                        todayTextColor: COLORS.secondaryPrimary,
+                        arrowColor: COLORS.secondaryPrimary
+                    }}
+                />
+                <FlatList
+                    data={attendanceByDate}
+                    keyExtractor={(_, index) => index.toString()}
+                    renderItem={_renderAttendanceItem}
+                    contentContainerStyle={{ marginTop: vs(10), paddingBottom: vs(50) }}
+                    scrollEnabled={false}
+                    ListEmptyComponent={
+                        <AppText
+                            style={[textStyles.emptyText, {
+                                textAlign: 'center', marginTop: vs(20)
+                            }]}
+                            txt={AppString.NoResultsFound}
+                        />
+                    }
+                />
+            </ScrollView>
 
             <EditAttendanceSheet
                 visible={state.editVisible}

@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { COLORS } from '../utils/theme'
 import { setBreakIn, setBreakOut, setEmployeeLoginStatus, setIsShowCheckIn } from '../store/reducers/appDataSlice'
@@ -22,37 +22,109 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
     const MAX_BREAKS_PER_DAY = 5;
 
     const [modalVisible, setModalVisible] = useState(false);
+    const [currentSessionData, setCurrentSessionData] = useState<{
+        startTime: string | null;
+        endTime: string | null;
+        breaks: any[];
+    }>({
+        startTime: null,
+        endTime: null,
+        breaks: []
+    });
 
     const currentUser = useSelector((state: RootState) => state.appData.saveUser);
-    const loginData = useSelector((state: RootState) => {
+    const loginData: any = useSelector((state: RootState) => {
         const empData = state.appData.employeeLoginStatus[currentUser?.id];
         if (!empData) return null;
         return empData.find(d => d.date === todayKey) || null;
     });
-    const isShownCheckIn = useSelector((state: RootState) => state.appData.showCheckInOption);
+
+    // Track current session
+    useEffect(() => {
+        if (loginData) {
+            if (loginData.isActive && !loginData.logoutTime) {
+                // Active session - check if we need to start a new session
+                if (!currentSessionData.startTime) {
+                    // New session starting
+                    setCurrentSessionData({
+                        startTime: loginData.loginTime,
+                        endTime: null,
+                        breaks: []
+                    });
+                } else {
+                    // Update breaks for current session
+                    if (loginData.breaks) {
+                        const sessionBreaks = loginData.breaks.filter((breakItem: any) => {
+                            const breakTime = new Date(breakItem.breakIn).getTime();
+                            const sessionStart = new Date(currentSessionData.startTime!).getTime();
+                            return breakTime >= sessionStart;
+                        });
+                        setCurrentSessionData(prev => ({
+                            ...prev,
+                            breaks: sessionBreaks
+                        }));
+                    }
+                }
+            } else if (loginData.logoutTime && currentSessionData.startTime) {
+                // Session has ended - set end time
+                setCurrentSessionData(prev => ({
+                    ...prev,
+                    endTime: loginData.logoutTime
+                }));
+            } else if (!loginData.isActive && !currentSessionData.startTime) {
+                // Not logged in and no session data - reset
+                setCurrentSessionData({
+                    startTime: null,
+                    endTime: null,
+                    breaks: []
+                });
+            }
+        }
+    }, [loginData, currentSessionData.startTime]);
+
+    // Count all breaks (including ongoing ones) for limit checking
     const isBreakLimitReached =
         loginData?.isActive &&
         !loginData?.isOnBreak &&
         (loginData?.breaks?.length || 0) >= MAX_BREAKS_PER_DAY;
 
-    const liveSeconds =
-        loginData?.isActive && loginData?.loginTime
-            ? (Date.now() - new Date(loginData.loginTime).getTime()) / 1000
-            : 0;
-    const totalTodaySeconds = (loginData?.totalWorkSecondsToday || 0) + (liveSeconds || 0);
+    // Total hours for CURRENT SESSION only 
+    const totalTodaySeconds = React.useMemo(() => {
+        // If no current session, show 0
+        if (!currentSessionData.startTime) return 0;
 
-    const lastBreak =
-        loginData?.breaks?.length
-            ? loginData.breaks[loginData.breaks.length - 1]
-            : null;
+        const sessionStartTime = new Date(currentSessionData.startTime).getTime();
 
-    const liveBreakSeconds =
-        loginData?.isOnBreak && lastBreak?.breakIn
-            ? (Date.now() - new Date(lastBreak.breakIn).getTime()) / 1000
-            : 0;
+        // If user is active but no end time yet, return 0 (no live updates)
+        if (loginData?.isActive && !currentSessionData.endTime) {
+            return 0; // Don't calculate live time
+        }
 
-    const totalBreakSeconds =
-        (loginData?.totalBreakSecondsToday || 0) + liveBreakSeconds;
+        // If session has ended, compute from session start to end time
+        if (currentSessionData.endTime) {
+            const sessionEndTime = new Date(currentSessionData.endTime).getTime();
+            return Math.floor((sessionEndTime - sessionStartTime) / 1000);
+        }
+
+        return 0;
+    }, [currentSessionData.startTime, currentSessionData.endTime, loginData?.isActive]);
+
+    // Total break seconds for CURRENT SESSION only - FIXED PRECISION
+    const totalBreakSeconds = React.useMemo(() => {
+        if (!currentSessionData.breaks?.length) return 0;
+
+        return currentSessionData.breaks.reduce((sum: number, b: any) => {
+            if (!b.breakOut) return sum;
+
+            // Normalize timestamps to seconds FIRST
+            const breakInSec = Math.floor(new Date(b.breakIn).getTime() / 1000);
+            const breakOutSec = Math.floor(new Date(b.breakOut).getTime() / 1000);
+
+            const diffSeconds = breakOutSec - breakInSec;
+
+            return diffSeconds > 0 ? sum + diffSeconds : sum;
+        }, 0);
+    }, [currentSessionData.breaks]);
 
     const handleLogoutPress = () => {
         if (isClockedIn) {
@@ -63,9 +135,24 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
             return;
         }
 
+        if (loginData?.isOnBreak) {
+            _showToast(
+                AppString.YourBreakInStillRunning,
+                AppString.error
+            );
+            return;
+        }
+
         if (loginData?.isActive) {
             setModalVisible(true);
         } else {
+            // Reset current session when starting new session
+            setCurrentSessionData({
+                startTime: null,
+                endTime: null,
+                breaks: []
+            });
+
             dispatch(
                 setEmployeeLoginStatus({
                     employeeId: currentUser?.id,
@@ -79,14 +166,18 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
 
     const checkoutHandler = () => {
         setModalVisible(false);
-        if (loginData?.isOnBreak) {
-            dispatch(
-                setBreakOut({
-                    employeeId: currentUser.id,
-                    timestamp: new Date().toISOString(),
-                })
-            );
-        }
+
+        // First end break if currently on break **
+        // if (loginData?.isOnBreak) {
+        //     dispatch(
+        //         setBreakOut({
+        //             employeeId: currentUser.id,
+        //             timestamp: new Date().toISOString(),
+        //         })
+        //     );
+        // }
+
+        // Then logout
         dispatch(setIsShowCheckIn(true));
         dispatch(
             setEmployeeLoginStatus({
@@ -97,6 +188,10 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
             })
         );
     };
+
+    // Get current session login/logout times
+    const currentSessionLoginTime = currentSessionData.startTime;
+    const currentSessionLogoutTime = currentSessionData.endTime;
 
     return (
         <AppCard>
@@ -113,8 +208,6 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
                         style={[textStyles.body, { color: '#1B1D28' }]}
                     />
                 </View>
-
-                {/* {isShownCheckIn == true ? null : */}
                 <TouchableOpacity
                     style={[
                         styles.powerButton,
@@ -132,7 +225,6 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
                         <PowerOff size={20} color={COLORS.danger} />
                     )}
                 </TouchableOpacity>
-                {/* } */}
             </View>
 
             <AppText
@@ -144,7 +236,9 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
                 <LogIn size={20} color={COLORS.secondaryPrimary} />
                 <Text style={styles.infoLabel}>Login</Text>
                 <Text style={styles.infoValue}>
-                    {loginData?.loginTime ? Constants.startEndTime(loginData.loginTime) : '--'}
+                    {currentSessionLoginTime
+                        ? Constants.startEndTime(currentSessionLoginTime)
+                        : '--'}
                 </Text>
             </View>
 
@@ -152,7 +246,9 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
                 <LogOut size={18} color={COLORS.danger} />
                 <Text style={styles.infoLabel}>Logout</Text>
                 <Text style={styles.infoValue}>
-                    {loginData?.logoutTime ? Constants.startEndTime(loginData.logoutTime) : '--'}
+                    {currentSessionLogoutTime
+                        ? Constants.startEndTime(currentSessionLogoutTime)
+                        : '--'}
                 </Text>
             </View>
 
@@ -164,15 +260,14 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
                         style={[
                             styles.breakButton,
                             {
-                                backgroundColor: isBreakLimitReached
-                                    ? COLORS.LightGrayDisable
-                                    : loginData?.isOnBreak
-                                        ? COLORS.activeRGBA
+                                backgroundColor: loginData?.isOnBreak
+                                    ? COLORS.activeRGBA
+                                    : isBreakLimitReached
+                                        ? COLORS.LightGrayDisable
                                         : COLORS.inActiveRGBA,
-                                opacity: isBreakLimitReached ? 0.6 : 1,
+                                opacity: (isBreakLimitReached && !loginData?.isOnBreak) ? 0.6 : 1,
                             },
                         ]}
-
                         onPress={async () => {
                             const isBreakIn = !loginData?.isOnBreak;
                             const breakCount = loginData?.breaks?.length || 0;
@@ -201,7 +296,6 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
                                     })
                             );
                         }}
-
                     >
                         {loginData?.isOnBreak ? (
                             <Fragment>
@@ -221,13 +315,17 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
                             </Fragment>
                         )}
                     </TouchableOpacity>
+                </Fragment>
+            )}
 
+            {/* Always show total hours - it will show session total when inactive */}
+            {loginData?.isActive && currentSessionData.startTime && (
+                <Fragment>
                     <View style={[styles.infoRow]}>
                         <Coffee size={20} color={COLORS.warning} />
                         <Text style={styles.infoLabel}>Total Break</Text>
                         <Text style={styles.infoValue}>
-                            {/* {Constants.formatHours(loginData?.totalBreakSecondsToday || 0)} */}
-                            {Constants.formatHours(totalBreakSeconds)}
+                            {totalBreakSeconds > 0 ? Constants.formatHours(totalBreakSeconds) : '0h 0m 0s'}
                         </Text>
                     </View>
                 </Fragment>
@@ -235,13 +333,13 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
 
             <View style={styles.divider} />
 
-            <View style={[styles.infoRow]}>
+            <View style={styles.infoRow}>
                 <Timer size={25} color={COLORS.secondaryPrimary} />
                 <Text style={[styles.infoLabel, { color: COLORS.secondaryPrimary, fontWeight: '700' }]}>
                     Total Hours
                 </Text>
                 <Text style={[styles.totalValue, { color: COLORS.secondaryPrimary }]}>
-                    {Constants.formatHours(totalTodaySeconds)}
+                    {totalTodaySeconds > 0 ? Constants.formatHours(totalTodaySeconds) : '0h 0m 0s'}
                 </Text>
             </View>
 
@@ -313,6 +411,25 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
+    },
+    breakToggle: {
+        marginTop: vs(12),
+        paddingVertical: vs(10),
+        paddingHorizontal: fs(12),
+        backgroundColor: COLORS.inActiveRGBA,
+        borderRadius: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    breakRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: vs(8),
+        paddingHorizontal: fs(12),
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E7EB',
     },
 })
 

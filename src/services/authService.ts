@@ -43,3 +43,18 @@ export const loginUser = (email: string, password: string): AdminUser | null => 
     }
     return null;
 }
+
+export const getAllUsers = () => {
+    const state = store.getState();
+    const employees = state.appData.createEmployee || [];
+    return [ADMIN_USERS, ...employees.map(emp => ({
+        id: emp.id,
+        name: emp.name,
+        email: emp.email,
+        password: emp.password,
+        role: 'employee',
+        file: emp.file,
+        phoneNumber: emp.phoneNumber,
+        fieldLocation: emp.fieldLocation,
+    }))];
+};

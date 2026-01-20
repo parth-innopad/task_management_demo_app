@@ -134,6 +134,7 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
                         onChangeText={formik.handleChange('taskTitle')}
                         onBlur={formik.handleBlur('taskTitle')}
                         errorMessage={formik.touched.taskTitle && formik.errors.taskTitle}
+                        hasError={!!(formik.touched.taskTitle && formik.errors.taskTitle)}
                     />
                 </View>
 
@@ -157,6 +158,7 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
                         errorMessage={
                             formik.touched.taskDescription && formik.errors.taskDescription
                         }
+                        hasError={!!(formik.touched.taskDescription && formik.errors.taskDescription)}
                     />
                 </View>
 
@@ -166,8 +168,13 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
                         txt={AppString.AssignedEmployees}
                     />
                     <TouchableOpacity
-                        style={[styles.selectBox, { justifyContent: 'space-between', marginTop: vs(20) }]}
-                        onPress={() => setState((prev) => ({ ...prev, showsLists: !state.showsLists }))}
+                        style={[styles.selectBox, {
+                            justifyContent: 'space-between',
+                            marginTop: vs(20),
+                            borderWidth: formik.touched.employeeSelect && formik.errors.employeeSelect ? 1 : 0,
+                            borderColor: formik.touched.employeeSelect && formik.errors.employeeSelect ? COLORS.danger : undefined,
+                        }]}
+                        onPress={() => { setState((prev) => ({ ...prev, showsLists: !state.showsLists })), Keyboard.dismiss() }}
                     >
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                             <User size={20} color={COLORS.secondaryPrimary} />
@@ -204,6 +211,7 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
                                                     selectEmployee: item.name,
                                                     selectEmployeeId: item.id
                                                 }));
+                                                Keyboard.dismiss();
                                                 formik.setFieldValue('employeeSelect', item.name);
                                             }}
                                         >
@@ -251,6 +259,7 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
                                         style={styles.suggestionItem}
                                         onPress={() => {
                                             formik.setFieldValue('location', item.fullAddress);
+                                            Keyboard.dismiss();
                                             setState((prev) => ({ ...prev, addressSuggestions: [] }))
                                         }}
                                     >
@@ -268,7 +277,10 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
                 />
 
                 <TouchableOpacity
-                    style={styles.timelineBoxFull}
+                    style={[styles.timelineBoxFull, {
+                        borderWidth: formik.touched.startDateTime && formik.errors.startDateTime ? 1 : 0,
+                        borderColor: formik.touched.startDateTime && formik.errors.startDateTime ? COLORS.danger : undefined,
+                    }]}
                     onPress={() => setState(prev => ({ ...prev, openStartPicker: true }))}
                 >
                     <Calendar size={20} color={COLORS.secondaryPrimary} />
@@ -297,6 +309,7 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
                             formik.setFieldTouched('startDateTime', false);
                             formik.validateField('startDateTime');
                             setState(prev => ({ ...prev, openStartPicker: false }));
+                            Keyboard.dismiss();
                         }}
                         onCancel={() =>
                             setState(prev => ({ ...prev, openStartPicker: false }))
@@ -317,7 +330,10 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
                 />
 
                 <TouchableOpacity
-                    style={styles.timelineBoxFull}
+                    style={[styles.timelineBoxFull, {
+                        borderWidth: formik.touched.endDateTime && formik.errors.endDateTime ? 1 : 0,
+                        borderColor: formik.touched.endDateTime && formik.errors.endDateTime ? COLORS.danger : undefined,
+                    }]}
                     onPress={() => setState(prev => ({ ...prev, openEndPicker: true }))}
                 >
                     <Calendar size={20} color={COLORS.secondaryPrimary} />
@@ -346,6 +362,7 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
                             formik.setFieldTouched('endDateTime', false);
                             formik.validateField('endDateTime');
                             setState(prev => ({ ...prev, openEndPicker: false }));
+                            Keyboard.dismiss();
                         }}
                         onCancel={() =>
                             setState(prev => ({ ...prev, openEndPicker: false }))

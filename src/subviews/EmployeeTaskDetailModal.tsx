@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment, useState } from 'react';
 import {
     View,
     Text,
@@ -28,6 +28,8 @@ const EmployeeTaskDetailModal: React.FC<EmployeeTaskDetailModalProps> = ({
     onClose,
 }) => {
 
+    const [showFullDescription, setShowFullDescription] = useState(false);
+
     const getStatusIcon = (status?: string) => {
         switch (status) {
             case 'Completed':
@@ -38,6 +40,47 @@ const EmployeeTaskDetailModal: React.FC<EmployeeTaskDetailModalProps> = ({
                 return <AlertCircle size={20} color={Constants.getStatusStyle('').text} />;
         }
     };
+
+    const renderDescription = () => {
+        const text = task?.taskDescription || '-';
+        const limit = 100;
+
+        if (text.length <= limit) {
+            return (
+                <AppText
+                    txt={text}
+                    style={[textStyles.bodySmall, { color: COLORS.text, lineHeight: 22 }]}
+                />
+            );
+        }
+
+        return (
+            <Fragment>
+                <AppText
+                    txt={
+                        showFullDescription
+                            ? text
+                            : text.substring(0, limit) + '...'
+                    }
+                    style={[textStyles.bodySmall, { color: COLORS.text, lineHeight: 22 }]}
+                />
+
+                <TouchableOpacity
+                    onPress={() => setShowFullDescription(prev => !prev)}
+                    style={{ marginTop: vs(6) }}
+                >
+                    <AppText
+                        txt={showFullDescription ? 'Read Less' : 'Read More'}
+                        style={[
+                            textStyles.primary13,
+                            { color: COLORS.secondaryPrimary },
+                        ]}
+                    />
+                </TouchableOpacity>
+            </Fragment>
+        );
+    };
+
 
     return (
         <Modal
@@ -83,18 +126,12 @@ const EmployeeTaskDetailModal: React.FC<EmployeeTaskDetailModalProps> = ({
                             <View style={styles.section}>
                                 <AppText
                                     txt={AppString.Description}
-                                    style={[textStyles.primary13, {
-                                        color: COLORS.textLight,
-                                        marginBottom: vs(10)
-                                    }]}
+                                    style={[
+                                        textStyles.primary13,
+                                        { color: COLORS.textLight, marginBottom: vs(10) },
+                                    ]}
                                 />
-                                <AppText
-                                    txt={task?.taskDescription}
-                                    style={[textStyles.bodySmall, {
-                                        color: COLORS.text,
-                                        lineHeight: 22,
-                                    }]}
-                                />
+                                {renderDescription()}
                             </View>
                         )}
 

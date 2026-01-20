@@ -1,5 +1,5 @@
-import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import { View, StyleSheet, TouchableOpacity, ScrollView, Alert, BackHandler } from 'react-native'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import ScreenContainer from '../../../../components/ScreenContainer'
 import { COLORS } from '../../../../utils/theme'
 import AppHeader from '../../../../components/AppHeader'
@@ -20,6 +20,8 @@ import AppText from '../../../../components/AppText'
 import { textStyles } from '../../../../common/CommonStyles'
 import AppCard from '../../../../components/AppCard'
 import { _showToast } from '../../../../services/UIS/toastConfig'
+import { useFocusEffect } from '@react-navigation/native'
+import ConfirmationModal from '../../../../subviews/ConfirmationModal'
 
 interface EmployeeDashboardProps {
     navigation?: any;
@@ -37,6 +39,7 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ navigation }) => 
     const [currentTask, setCurrentTask] = useState<any>(null);
     const [deferredClockHandler, setDeferredClockHandler] = useState<(() => void) | any>(null);
     const [clockOutCompletion, setClockOutCompletion] = useState<((data: { status: TaskStatus_Type; taskTitle: string }) => void) | null>(null);
+    const [exitVisible, setExitVisible] = useState(false);
 
     const saveUser = useSelector((state: any) => state.appData.saveUser);
     const allTasks = useSelector((state: RootState) => state.appData.tasks);
@@ -69,6 +72,22 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ navigation }) => 
             setCurrentTask(null);
         }
     }, [allTasks, currentUser]);
+
+    useFocusEffect(
+        useCallback(() => {
+            const backAction = () => {
+                setExitVisible(true);
+                return true;
+            };
+
+            const backHandler = BackHandler.addEventListener(
+                'hardwareBackPress',
+                backAction
+            );
+
+            return () => backHandler.remove();
+        }, [])
+    );
 
     return (
         <ScreenContainer backgroundColor={COLORS.bg}>
@@ -229,6 +248,19 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ navigation }) => 
                         });
 
                         setIsClockedIn(false);
+                    }}
+                />
+
+                <ConfirmationModal
+                    visible={exitVisible}
+                    title="Exit App"
+                    message="Are you sure you want to exit?"
+                    cancel={AppString.Cancel}
+                    confirm="Exit"
+                    onCancel={() => setExitVisible(false)}
+                    onConfirm={() => {
+                        setExitVisible(false);
+                        BackHandler.exitApp();
                     }}
                 />
             </ScrollView>

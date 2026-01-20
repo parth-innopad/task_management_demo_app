@@ -7,12 +7,13 @@ interface AppTextProps {
     numberOfLines?: number;
     ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
     onPress?: () => void;
+    onTextLayout?: any;
 }
 
 const AppText = (props: AppTextProps) => {
     return (
         <Pressable disabled={!props.onPress} onPress={props.onPress}>
-            <Text ellipsizeMode={props.ellipsizeMode} numberOfLines={props.numberOfLines} style={props.style}>{props.txt}</Text>
+            <Text ellipsizeMode={props.ellipsizeMode} numberOfLines={props.numberOfLines} onTextLayout={props.onTextLayout} style={props.style}>{props.txt}</Text>
         </Pressable>
     );
 };

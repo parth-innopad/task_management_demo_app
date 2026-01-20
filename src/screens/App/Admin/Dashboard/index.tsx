@@ -1,5 +1,5 @@
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, BackHandler } from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
 import ScreenContainer from '../../../../components/ScreenContainer'
 import AppHeader from '../../../../components/AppHeader'
 import { COLORS } from '../../../../utils/theme'
@@ -13,6 +13,7 @@ import AppText from '../../../../components/AppText'
 import { textStyles } from '../../../../common/CommonStyles'
 import ConfirmationModal from '../../../../subviews/ConfirmationModal'
 import { _showToast } from '../../../../services/UIS/toastConfig'
+import { useFocusEffect } from '@react-navigation/native'
 
 interface DashboardProps {
     navigation?: any;
@@ -23,10 +24,25 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
     const dispatch = useDispatch();
 
     const [logoutVisible, setLogoutVisible] = useState(false);
+    const [exitVisible, setExitVisible] = useState(false);
 
     const logoutHandler = () => {
         setLogoutVisible(true);
     };
+
+    useFocusEffect(
+        useCallback(() => {
+            const backAction = () => {
+                setExitVisible(true);
+                return true;
+            };
+            const backHandler = BackHandler.addEventListener(
+                'hardwareBackPress',
+                backAction
+            );
+            return () => backHandler.remove();
+        }, [])
+    );
 
     return (
         <ScreenContainer backgroundColor={COLORS.bg}>
@@ -96,6 +112,19 @@ const Dashboard: React.FC<DashboardProps> = ({ navigation }) => {
                             },
                         ],
                     });
+                }}
+            />
+
+            <ConfirmationModal
+                visible={exitVisible}
+                title="Exit App"
+                message="Are you sure you want to exit?"
+                cancel={AppString.Cancel}
+                confirm="Exit"
+                onCancel={() => setExitVisible(false)}
+                onConfirm={() => {
+                    setExitVisible(false);
+                    BackHandler.exitApp();
                 }}
             />
         </ScreenContainer>

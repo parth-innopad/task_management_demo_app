@@ -111,8 +111,9 @@ export const AppString = {
     Profile: 'Profile',
     MyAttendance: "My Attendance",
     NoAttendanceFoundForThisDate: 'No attendance found for this date',
-    TotalWorking: 'Total Working',
-    BreakHours: 'Break Hours',
+    TotalWorking: 'Total Hours',
+    BreakHours: 'Total Break Hours',
+    TotalWorkingHoursDetails: 'Total Hours Details',
     BreakDetails: 'Break Details',
     Dashboard: 'Dashboard',
     Hello: 'Hello',
@@ -161,5 +162,10 @@ export const AppString = {
     TaskDeletedSuccessfully: 'Task Deleted Successfully',
     LogoutSuccessfully: 'Logout Successfully',
     StartActiveTimeFirst: "Active Time is not started, Please Start active time first",
-    YourWorkSessionIsRunning: "Your work session is still active, Please check out first."
+    YourWorkSessionIsRunning: "Your work session is still active, Please check out first.",
+    YourActiveTimeIsRunning: "Your active time is running, Please inActive first.",
+    YourBreakInStillRunning: "Your break-in is still running, Please break-out first",
+    InvalidEmailAddress: "Invalid email address",
+    IncorrectPassword: "Incorrect password",
+    InvalidUserRole: "Invalid user role"
 }
