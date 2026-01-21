@@ -46,23 +46,12 @@ export const createEditEmployeeValidationSchema = Yup.object().shape({
         .required('Field location is required'),
 });
 
-const combineDateTime = (date: Date, time: Date) => {
-    const combined = new Date(date);
-    combined.setHours(
-        time.getHours(),
-        time.getMinutes(),
-        time.getSeconds(),
-        time.getMilliseconds()
-    );
-    return combined;
-};
-
 export const createEditTasksValidationSchema = Yup.object().shape({
     taskTitle: Yup.string().required('Task title is required'),
     taskDescription: Yup.string()
-        // .min(50, 'Minimum 50 characters required')
         .required('Task description is required'),
     employeeSelect: Yup.string().required('Please select employee'),
+    employeeSelectId: Yup.string(),
     startDateTime: Yup.date()
         .required('Start date & time is required'),
     endDateTime: Yup.date()

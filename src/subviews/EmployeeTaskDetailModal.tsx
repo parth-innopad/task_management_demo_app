@@ -122,6 +122,26 @@ const EmployeeTaskDetailModal: React.FC<EmployeeTaskDetailModalProps> = ({
                             </View>
                         </View>
 
+                        <View style={styles.section}>
+                            <AppText
+                                txt={AppString.AssignedTo}
+                                style={[textStyles.primary13, {
+                                    color: COLORS.textLight,
+                                    marginBottom: vs(10),
+                                }]}
+                            />
+                            <AppText
+                                txt={task?.employeeSelect || 'N/A'}
+                                style={[textStyles.bodySmall, {
+                                    color: COLORS.text,
+                                    paddingHorizontal: hs(12),
+                                    paddingVertical: vs(10),
+                                    backgroundColor: COLORS.card,
+                                    borderRadius: RADIUS.md,
+                                }]}
+                            />
+                        </View>
+
                         {task?.taskDescription && (
                             <View style={styles.section}>
                                 <AppText
@@ -202,26 +222,6 @@ const EmployeeTaskDetailModal: React.FC<EmployeeTaskDetailModalProps> = ({
                                 </View>
                             </View>
                         </View>
-
-                        <View style={styles.section}>
-                            <AppText
-                                txt={AppString.AssignedTo}
-                                style={[textStyles.primary13, {
-                                    color: COLORS.textLight,
-                                    marginBottom: vs(10),
-                                }]}
-                            />
-                            <AppText
-                                txt={task?.employeeSelect || 'N/A'}
-                                style={[textStyles.bodySmall, {
-                                    color: COLORS.text,
-                                    paddingHorizontal: hs(12),
-                                    paddingVertical: vs(10),
-                                    backgroundColor: COLORS.card,
-                                    borderRadius: RADIUS.md,
-                                }]}
-                            />
-                        </View>
                         <View style={styles.bottomSpacer} />
                     </ScrollView>
                 </View>
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     },
     timelineItem: {
         flexDirection: 'row',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         gap: hs(12),
         paddingHorizontal: hs(12),
         paddingVertical: vs(12),

@@ -15,22 +15,16 @@ import { AppString } from '../common/AppString';
 
 const STATUS = ['all', 'Pending', 'In Progress', 'Completed'];
 
-const DEFAULT_FILTERS: any = {
-    status: 'all',
-    priority: 'all',
-    employeeId: 'all',
-    startDate: null,
-    endDate: null,
-};
-
 const TasksFilterSheet = ({
     visible,
     onClose,
     employees = [],
     onApply,
+    filters,
+    setFilters,
+    DEFAULT_FILTERS
 }: any) => {
 
-    const [filters, setFilters] = useState({ ...DEFAULT_FILTERS });
     const [openStartPicker, setOpenStartPicker] = useState(false);
     const [openEndPicker, setOpenEndPicker] = useState(false);
 

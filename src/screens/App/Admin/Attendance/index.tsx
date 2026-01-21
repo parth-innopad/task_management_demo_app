@@ -1,5 +1,5 @@
 import { View, TouchableOpacity, StyleSheet, FlatList, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import ScreenContainer from '../../../../components/ScreenContainer';
 import { COLORS } from '../../../../utils/theme';
 import AppHeader from '../../../../components/AppHeader';
@@ -80,6 +80,7 @@ const Attendance: React.FC<AttendanceProps> = ({ navigation }) => {
         const key = `${item.user.id}-${item.date}`;
         const isExpanded = expandedBreaks[key];
         const isExpandedTotalHrs = expandedTotalHours[key];
+        const totalBreakSeconds = Constants.getTotalBreakSeconds(item.breaks);
         return (
             <AppCard style={styles.card}>
                 <View style={styles.headerRow}>
@@ -148,7 +149,7 @@ const Attendance: React.FC<AttendanceProps> = ({ navigation }) => {
                 </View>
 
                 {item.sessions?.length > 0 && (
-                    <View style={[styles.breakSection, { marginTop: vs(10) }]}>
+                    <View style={[styles.breakSection, { marginTop: vs(20) }]}>
                         <TouchableOpacity
                             style={styles.breakHeader}
                             onPress={() => toggleTotalHours(key)}
@@ -204,13 +205,16 @@ const Attendance: React.FC<AttendanceProps> = ({ navigation }) => {
                                     />
                                     <AppText
                                         style={[textStyles.bodySmall, { color: COLORS.secondaryPrimary }]}
-                                        // txt={`${Constants.formatHours(br.durationSeconds)}`}
                                         txt={Constants.formatHours(Constants.getBreakSeconds(br))}
                                     />
                                 </View>
                             ))}
                     </View>
                 )}
+                <AppText
+                    style={[textStyles.bodySmall, { marginTop: vs(15), color: COLORS.secondary }]}
+                    txt={`${AppString.BreakHours} :- ${Constants.formatHours(totalBreakSeconds)}`}
+                />
                 <View style={styles.footerRow}>
                     <AppText
                         style={[textStyles.bodySmall, { color: COLORS.secondaryPrimary }]}
@@ -242,11 +246,6 @@ const Attendance: React.FC<AttendanceProps> = ({ navigation }) => {
                 leftIcon={
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <ArrowLeft size={25} color={COLORS.secondaryPrimary} />
-                    </TouchableOpacity>
-                }
-                rightIconOnly={
-                    <TouchableOpacity onPress={() => navigation.navigate(NavigationKeys.AttendanceRules)}>
-                        <Settings size={25} color={COLORS.secondaryPrimary} />
                     </TouchableOpacity>
                 }
             />

@@ -23,6 +23,14 @@ interface TasksProps {
     navigation: any
 }
 
+const DEFAULT_FILTERS: any = {
+    status: 'all',
+    priority: 'all',
+    employeeId: 'all',
+    startDate: null,
+    endDate: null,
+};
+
 const Tasks: React.FC<TasksProps> = ({ navigation }) => {
 
     const dispatch = useDispatch();
@@ -42,6 +50,7 @@ const Tasks: React.FC<TasksProps> = ({ navigation }) => {
     });
 
     const [deleteTaskId, setDeleteTaskId] = useState<any>(null);
+    const [filters, setFilters] = useState({ ...DEFAULT_FILTERS });
 
     const tasksLists = useSelector((state: any) => state.appData.tasks);
     const employees = useSelector((state: any) => state.appData.createEmployee);
@@ -209,19 +218,26 @@ const Tasks: React.FC<TasksProps> = ({ navigation }) => {
                         color={isFilterApplied ? COLORS.card : COLORS.secondaryPrimary}
                     />
                 </TouchableOpacity>
-
             </View>
 
             <AppKeyboardScrollView>
                 {isFilterApplied && (
-                    <View style={{ marginHorizontal: hs(20), marginTop: vs(10) }}>
-                        <AppText
-                            txt={`Filtered ${appliedFilters.status.toLowerCase()} (${filteredTasks.length} results)`}
-                            style={[
-                                textStyles.bodySmall,
-                                { color: COLORS.secondaryPrimary, fontWeight: '600' },
-                            ]}
-                        />
+                    <View style={{ marginHorizontal: hs(20), marginTop: vs(20) }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <AppText
+                                txt={`Filtered ${appliedFilters.status.toLowerCase()} (${filteredTasks.length} results)`}
+                                style={[
+                                    textStyles.bodySmall,
+                                    { color: COLORS.secondaryPrimary, fontWeight: '600' },
+                                ]}
+                            />
+                            <X size={25} color={COLORS.danger}
+                                onPress={() => {
+                                    const resetFilters = { ...DEFAULT_FILTERS }
+                                    setFilters(resetFilters)
+                                    onApplyFilters(resetFilters);
+                                }} />
+                        </View>
                     </View>
                 )}
 
@@ -260,6 +276,9 @@ const Tasks: React.FC<TasksProps> = ({ navigation }) => {
                 onClose={() =>
                     setState(prev => ({ ...prev, filterVisible: false }))
                 }
+                filters={filters}
+                setFilters={setFilters}
+                DEFAULT_FILTERS={DEFAULT_FILTERS}
             />
 
             <ConfirmationModal

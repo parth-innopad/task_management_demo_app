@@ -29,7 +29,6 @@ const EmployeeTasksSummary: React.FC<EmployeeTasksSummaryProps> = ({ navigation 
         React.useCallback(() => {
             const loadRecords = async () => {
                 const stored = await AsyncStorage.getItem('clockRecords_v2')
-                console.log("STORED -->", JSON.parse(stored || '[]')[0]);
                 if (stored) {
                     setClockRecords(JSON.parse(stored))
                 }
@@ -79,18 +78,16 @@ const EmployeeTasksSummary: React.FC<EmployeeTasksSummaryProps> = ({ navigation 
                     </TouchableOpacity>
                 }
             />
-
-            <Calendar
-                markingType="multi-dot"
-                markedDates={markedDates}
-                onDayPress={(day) => setSelectedDate(day.dateString)}
-                theme={{
-                    todayTextColor: COLORS.secondaryPrimary,
-                    arrowColor: COLORS.secondaryPrimary,
-                }}
-            />
-
-            <ScrollView contentContainerStyle={styles.container}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: vs(50) }}>
+                <Calendar
+                    markingType="multi-dot"
+                    markedDates={markedDates}
+                    onDayPress={(day) => setSelectedDate(day.dateString)}
+                    theme={{
+                        todayTextColor: COLORS.secondaryPrimary,
+                        arrowColor: COLORS.secondaryPrimary,
+                    }}
+                />
                 {filteredList.length === 0 ? (
                     <AppText
                         txt={AppString.NotFoundAnyTaskSummary}
@@ -98,7 +95,6 @@ const EmployeeTasksSummary: React.FC<EmployeeTasksSummaryProps> = ({ navigation 
                     />
                 ) : (
                     filteredList.map((item, index) => {
-                        console.log('item ->', item);
                         // if (!item.taskTitle) return null;
                         return (
                             <AppCard key={index} style={styles.card}>
@@ -160,13 +156,13 @@ const EmployeeTasksSummary: React.FC<EmployeeTasksSummaryProps> = ({ navigation 
 
 const styles = StyleSheet.create({
     container: {
-        padding: hs(16),
-        paddingBottom: vs(50)
+        marginHorizontal: hs(15),
+        marginTop: vs(10),
+        paddingBottom: vs(50),
     },
     card: {
-        marginBottom: vs(14),
-        padding: hs(14),
-        borderRadius: 16,
+        marginHorizontal: hs(15),
+        marginTop: vs(20),
     },
     dateSection: {
         flexDirection: 'row',

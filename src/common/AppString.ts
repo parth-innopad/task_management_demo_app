@@ -169,5 +169,6 @@ export const AppString = {
     IncorrectPassword: "Incorrect password",
     InvalidUserRole: "Invalid user role",
     addYourFirstEmployee: "Add your first employee",
-    addYourFirstTask: 'Add your first task'
+    addYourFirstTask: 'Add your first task',
+    YouReachedBreakToday: 'You have reached the maximum 5 breaks for today'
 }

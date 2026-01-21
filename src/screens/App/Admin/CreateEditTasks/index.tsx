@@ -53,7 +53,7 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
         showStatusLists: false,
         status: 'Pending',
         statusId: '1',
-        addressSuggestions: []
+        addressSuggestions: [],
     });
 
     const formik = useFormik({
@@ -62,6 +62,7 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
             taskTitle: editTasksLists?.taskTitle?.trim() || '',
             taskDescription: editTasksLists?.taskDescription?.trim() || '',
             employeeSelect: editTasksLists?.employeeSelect || '',
+            employeeSelectId: editTasksLists?.employeeSelectId || '',
             location: editTasksLists?.location?.trim() || '',
             startDateTime: editTasksLists?.startDateTime
                 ? new Date(editTasksLists.startDateTime)
@@ -75,7 +76,7 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
             const payload: any = {
                 tasksId: route?.params?.taskId ?? Date.now().toString(),
                 ...values,
-                employeeSelectId: editTasksLists?.employeeSelectId || state.selectEmployeeId,
+                employeeSelectId: values.employeeSelectId,
                 status: editTasksLists?.status || state.status,
                 statusId: state.statusId,
             };
@@ -222,6 +223,7 @@ const CreateEditTasks: React.FC<CreateEditTasksProps> = ({ navigation, route }) 
                                                 }));
                                                 Keyboard.dismiss();
                                                 formik.setFieldValue('employeeSelect', item.name);
+                                                formik.setFieldValue('employeeSelectId', item.id);
                                             }}
                                         >
                                             <AppText

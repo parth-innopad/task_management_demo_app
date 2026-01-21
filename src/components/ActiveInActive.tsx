@@ -52,7 +52,6 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
 
     useEffect(() => {
         if (!loginData) return;
-
         // SESSION START
         if (loginData.isActive && !loginData.logoutTime) {
             setCurrentSessionData(prev => {
@@ -66,7 +65,7 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
                 return {
                     startTime: sessionStart,
                     endTime: null,
-                    breaks: sessionBreaks, // ✅ full list
+                    breaks: sessionBreaks,
                 };
             });
         }
@@ -78,7 +77,6 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
             }));
         }
     }, [loginData]);
-
 
     // Count all breaks (including ongoing ones) for limit checking
     const isBreakLimitReached =
@@ -247,15 +245,14 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
             {loginData?.isActive && (
                 <Fragment>
                     <TouchableOpacity
-                        disabled={isBreakLimitReached}
                         style={[
                             styles.breakButton,
                             {
                                 backgroundColor: loginData?.isOnBreak
-                                    ? COLORS.activeRGBA
+                                    ? COLORS.inActiveRGBA
                                     : isBreakLimitReached
                                         ? COLORS.LightGrayDisable
-                                        : COLORS.inActiveRGBA,
+                                        : COLORS.activeRGBA,
                                 opacity: (isBreakLimitReached && !loginData?.isOnBreak) ? 0.6 : 1,
                                 marginTop: vs(20)
                             },
@@ -266,7 +263,7 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
 
                             if (isBreakIn && breakCount >= MAX_BREAKS_PER_DAY) {
                                 _showToast(
-                                    'You have reached the maximum 5 breaks for today',
+                                    AppString.YouReachedBreakToday,
                                     AppString.error
                                 );
                                 return;
@@ -291,7 +288,7 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
                     >
                         {loginData?.isOnBreak ? (
                             <Fragment>
-                                <PlayCircle size={20} color={COLORS.success} />
+                                <PauseCircle size={20} color={COLORS.danger} />
                                 <AppText
                                     txt='Break Out'
                                     style={[textStyles.bodySmall, { color: COLORS.blackColor }]}
@@ -299,7 +296,7 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
                             </Fragment>
                         ) : (
                             <Fragment>
-                                <PauseCircle size={20} color={COLORS.warning} />
+                                <PlayCircle size={20} color={COLORS.success} />
                                 <AppText
                                     txt='Break In'
                                     style={[textStyles.bodySmall, { color: COLORS.blackColor }]}
@@ -335,7 +332,7 @@ const ActiveInActive = ({ isClockedIn, onBreakInBefore }: any) => {
 
                     {/* Break Out */}
                     <View style={styles.infoRow}>
-                        <Coffee size={18} color={COLORS.warning} />
+                        <Coffee size={18} color={COLORS.danger} />
                         <Text style={styles.infoLabel}>Break Out</Text>
                         <Text style={styles.infoValue}>
                             {latestBreak.breakOut

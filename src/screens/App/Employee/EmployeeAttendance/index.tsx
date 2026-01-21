@@ -91,21 +91,19 @@ const EmployeeAttendance: React.FC<EmployeeAttendanceProps> = ({ navigation }: a
                     </TouchableOpacity>
                 }
             />
-
-            <Calendar
-                markedDates={markedDates}
-                onDayPress={day => {
-                    setSelectedDate(day.dateString)
-                    setShowBreaks(false)
-                    setShowTotalHours(false)
-                }}
-                theme={{
-                    todayTextColor: COLORS.secondaryPrimary,
-                    arrowColor: COLORS.secondaryPrimary,
-                }}
-            />
-
-            <ScrollView contentContainerStyle={styles.container}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: vs(50) }}>
+                <Calendar
+                    markedDates={markedDates}
+                    onDayPress={day => {
+                        setSelectedDate(day.dateString)
+                        setShowBreaks(false)
+                        setShowTotalHours(false)
+                    }}
+                    theme={{
+                        todayTextColor: COLORS.secondaryPrimary,
+                        arrowColor: COLORS.secondaryPrimary,
+                    }}
+                />
                 {!dayAttendance ? (
                     <AppText
                         txt={AppString.NoAttendanceFoundForThisDate}
@@ -267,12 +265,13 @@ export default EmployeeAttendance;
 
 const styles = StyleSheet.create({
     container: {
-        padding: hs(16),
-        paddingBottom: vs(40),
+        marginHorizontal: hs(15),
+        marginTop: vs(10),
+        paddingBottom: vs(50),
     },
     card: {
-        padding: hs(16),
-        borderRadius: 18,
+        marginHorizontal: hs(15),
+        marginTop: vs(20),
     },
     rowBetween: {
         flexDirection: 'row',

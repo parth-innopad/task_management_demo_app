@@ -277,5 +277,19 @@ export const Constants = {
         return Math.floor(
             (new Date(b.breakOut).getTime() - new Date(b.breakIn).getTime()) / 1000
         );
+    },
+    getTotalBreakSeconds: (breaks: any[] = []) => {
+        if (!breaks?.length) return 0;
+
+        return breaks.reduce((total, br) => {
+            if (!br.breakIn || !br.breakOut) return total;
+
+            const breakInMs = new Date(br.breakIn).getTime();
+            const breakOutMs = new Date(br.breakOut).getTime();
+
+            const diffSeconds = Math.floor((breakOutMs - breakInMs) / 1000);
+
+            return diffSeconds > 0 ? total + diffSeconds : total;
+        }, 0);
     }
 }
