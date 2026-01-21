@@ -66,11 +66,11 @@ const EmployeeAttendance: React.FC<EmployeeAttendanceProps> = ({ navigation }: a
 
     const dayAttendance = dateMap[selectedDate];
 
-    const totalBreakSecondsToday = React.useMemo(() => {
-        if (!dayAttendance.breaks?.length) return 0;
+    const totalBreakSecondsToday = useMemo(() => {
+        if (!dayAttendance || !dayAttendance.breaks?.length) return 0;
 
         return dayAttendance.breaks.reduce((sum: number, b: any) => {
-            if (!b.breakOut) return sum;
+            if (!b.breakOut || !b.breakIn) return sum;
 
             const breakInMs = new Date(b.breakIn).getTime();
             const breakOutMs = new Date(b.breakOut).getTime();
@@ -79,7 +79,7 @@ const EmployeeAttendance: React.FC<EmployeeAttendanceProps> = ({ navigation }: a
 
             return diffSeconds > 0 ? sum + diffSeconds : sum;
         }, 0);
-    }, [dayAttendance.breaks]);
+    }, [dayAttendance]);
 
     return (
         <ScreenContainer backgroundColor={COLORS.bg}>
